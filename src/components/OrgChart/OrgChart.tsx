@@ -82,8 +82,8 @@ function AgentNode({ agent, x, y, onClick, selected }: {
 function ConnectionLines({ tree }: { tree: NodePos }) {
   const svgRef = useRef<SVGSVGElement>(null)
 
-  function renderLines(node: NodePos): JSX.Element[] {
-    const lines: JSX.Element[] = []
+  function renderLines(node: NodePos): React.JSX.Element[] {
+    const lines: React.JSX.Element[] = []
     node.children.forEach((child, i) => {
       lines.push(
         <g key={`${node.agent.id}-${child.agent.id}`}>
@@ -127,8 +127,8 @@ export default function OrgChart() {
   const [selected, setSelected] = useState<string | null>(null)
   const tree = buildTree()
 
-  function renderNodes(node: NodePos): JSX.Element[] {
-    const nodes: JSX.Element[] = [
+  function renderNodes(node: NodePos): React.JSX.Element[] {
+    const nodes: React.JSX.Element[] = [
       <AgentNode
         key={node.agent.id}
         agent={node.agent}
