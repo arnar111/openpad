@@ -25,10 +25,31 @@ export interface LiveAgent extends Agent {
   primaryModel: string
 }
 
+// Maps OpenClaw agent IDs to OpenPad agent IDs
+// main = Blær, mufc = Friðrik (Discord bot, separate), regn = Regn
+// Frost, Ylur, Stormur are conceptual team members — they work through
+// subagent sessions and Discord, so we detect them from session patterns
 const AGENT_ID_MAP: Record<string, string> = {
   main: 'blaer',
-  mufc: 'frost', // Frost handles Discord bot
   regn: 'regn',
+}
+
+function inferAgentFromSession(session: SessionData): string | null {
+  const key = session.key || ''
+  // Subagent sessions = Frost's team working
+  if (key.includes('subagent')) return 'frost'
+  // Discord agent-team channel = team collaboration
+  if (key.includes('discord') && key.includes('1471287901')) return 'frost'
+  // Cron jobs with specific patterns
+  if (key.includes('cron')) {
+    // Distribute cron work across team for visual variety
+    const hash = key.split(':').pop() || ''
+    const n = hash.charCodeAt(0) % 3
+    if (n === 0) return 'ylur'
+    if (n === 1) return 'stormur'
+    return 'frost'
+  }
+  return null
 }
 
 export function useLiveAgents(): { agents: LiveAgent[]; connected: boolean } {
@@ -46,33 +67,59 @@ export function useLiveAgents(): { agents: LiveAgent[]; connected: boolean } {
       }
     }
 
-    // Map OpenClaw agent IDs to our agent IDs
-    let openclawId: string | undefined
-    for (const [ocId, padId] of Object.entries(AGENT_ID_MAP)) {
-      if (padId === agent.id) {
-        openclawId = ocId
-        break
-      }
-    }
+    // Direct mapping for Blær and Regn
+    const openclawId = Object.entries(AGENT_ID_MAP).find(([, padId]) => padId === agent.id)?.[0]
 
-    const agentSessions = status.sessions.recent.filter(
-      (s) => s.agentId === openclawId
-    )
+    let agentSessions: SessionData[]
+
+    if (openclawId) {
+      // Direct OpenClaw agent
+      agentSessions = status.sessions.recent.filter(
+        (s) => s.agentId === openclawId
+      )
+    } else {
+      // Inferred agents (Frost, Ylur, Stormur) — match from session patterns
+      agentSessions = status.sessions.recent.filter(
+        (s) => inferAgentFromSession(s) === agent.id
+      )
+    }
     
-    const activeSessions = agentSessions.filter(s => s.age < 300000).length // active in last 5 min
+    const activeSessions = agentSessions.filter(s => s.age < 300000).length
     const totalTokens = agentSessions.reduce((sum, s) => sum + s.totalTokens, 0)
     const lastSession = agentSessions.sort((a, b) => b.updatedAt - a.updatedAt)[0]
     
     // Determine status from session activity
     let liveStatus: Agent['status'] = 'offline'
     if (lastSession) {
-      if (lastSession.age < 120000) liveStatus = 'active' // active in last 2 min
-      else if (lastSession.age < 600000) liveStatus = 'idle' // active in last 10 min
+      if (lastSession.age < 120000) liveStatus = 'active'
+      else if (lastSession.age < 600000) liveStatus = 'idle'
+      else if (lastSession.age < 3600000) liveStatus = 'idle' // within 1hr = idle
+    }
+
+    // For Frost: also check if any subagent ran recently
+    if (agent.id === 'frost' && liveStatus === 'offline') {
+      const anySubagent = status.sessions.recent.find(
+        s => s.key.includes('subagent') && s.age < 3600000
+      )
+      if (anySubagent) liveStatus = 'idle'
     }
 
     // Get model from config
     const agentConfig = status.agents?.list?.find((a: { id: string }) => a.id === openclawId)
-    const model = agentConfig?.model?.primary || status.sessions.defaults.model
+    const model = agentConfig?.model?.primary || 
+      (agent.id === 'frost' ? 'discord-bot' : 
+       agent.id === 'ylur' || agent.id === 'stormur' ? 'subagent' :
+       status.sessions.defaults.model)
+
+    // Better task description
+    let task = agent.currentTask
+    if (lastSession) {
+      const key = lastSession.key
+      if (key.includes('subagent')) task = 'Building OpenPad'
+      else if (key.includes('discord')) task = 'Discord coordination'
+      else if (key.includes('cron')) task = `Cron: ${lastSession.model}`
+      else if (key.includes('main')) task = 'Main session active'
+    }
 
     return {
       ...agent,
@@ -82,7 +129,7 @@ export function useLiveAgents(): { agents: LiveAgent[]; connected: boolean } {
       lastActive: lastSession?.updatedAt || null,
       activeSessions,
       primaryModel: model,
-      currentTask: lastSession ? `Session: ${lastSession.key.split(':').slice(-1)[0].slice(0, 12)}...` : agent.currentTask,
+      currentTask: task,
     }
   })
 
