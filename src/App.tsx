@@ -3,6 +3,7 @@ import OfficeView from './components/Office/OfficeView'
 import OrgChart from './components/OrgChart/OrgChart'
 import Dashboard from './components/Dashboard/Dashboard'
 import ChatRoom from './components/Chat/ChatRoom'
+import PinLock, { useAuth } from './components/PinLock/PinLock'
 
 type Tab = 'office' | 'org' | 'dashboard' | 'chat'
 
@@ -15,6 +16,11 @@ const tabs: { id: Tab; label: string; icon: string }[] = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('office')
+  const { unlocked, unlock } = useAuth()
+
+  if (!unlocked) {
+    return <PinLock onUnlock={unlock} />
+  }
 
   return (
     <div className="h-screen w-screen flex flex-col bg-office-bg overflow-hidden">
