@@ -107,7 +107,7 @@ export default function Dashboard() {
           <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full ${connected ? 'bg-green-900/20' : 'bg-red-900/20'}`}>
             <div className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
             <span className={`font-pixel text-[5px] ${connected ? 'text-green-400' : 'text-red-400'}`}>
-              {connected ? 'LIVE' : 'OFFLINE'}
+              {connected ? 'LIVE' : 'SNAPSHOT'}
             </span>
           </div>
         </div>

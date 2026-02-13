@@ -80,20 +80,28 @@ export interface OpenClawStatus {
   }
 }
 
+import snapshot from '../data/status-snapshot.json'
+
 const DATA_URL = '/data/status.json'
 const POLL_INTERVAL = 15000
 
-type Listener = (data: OpenClawStatus) => void
+type Listener = (data: OpenClawStatus, live: boolean) => void
 
 class OpenPadAPI {
   private listeners: Set<Listener> = new Set()
-  private data: OpenClawStatus | null = null
+  private data: OpenClawStatus
+  private live = false
   private polling = false
   private timer: ReturnType<typeof setInterval> | null = null
 
+  constructor() {
+    // Start with baked-in snapshot so Netlify always has data
+    this.data = snapshot as unknown as OpenClawStatus
+  }
+
   subscribe(fn: Listener): () => void {
     this.listeners.add(fn)
-    if (this.data) fn(this.data)
+    fn(this.data, this.live)
     if (!this.polling) this.startPolling()
     return () => {
       this.listeners.delete(fn)
@@ -120,16 +128,25 @@ class OpenPadAPI {
       const res = await fetch(DATA_URL + '?t=' + Date.now())
       if (res.ok) {
         const data = await res.json()
+        // Only count as live if data is less than 60s old
+        const age = Date.now() - (data.timestamp || 0)
+        this.live = age < 60000
         this.data = data
-        this.listeners.forEach(fn => fn(data))
+        this.listeners.forEach(fn => fn(data, this.live))
       }
     } catch {
-      // Data bridge not running yet, silently retry
+      // Bridge not available (e.g. Netlify) — keep using snapshot
+      this.live = false
+      this.listeners.forEach(fn => fn(this.data, false))
     }
   }
 
-  getLatest(): OpenClawStatus | null {
+  getLatest(): OpenClawStatus {
     return this.data
+  }
+
+  isLive(): boolean {
+    return this.live
   }
 }
 

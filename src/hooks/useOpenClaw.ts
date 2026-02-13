@@ -3,13 +3,13 @@ import { api, OpenClawStatus, SessionData } from '../lib/api'
 import { agents, Agent } from '../data/agents'
 
 export function useOpenClawStatus() {
-  const [status, setStatus] = useState<OpenClawStatus | null>(null)
+  const [status, setStatus] = useState<OpenClawStatus | null>(api.getLatest())
   const [connected, setConnected] = useState(false)
 
   useEffect(() => {
-    const unsub = api.subscribe((data) => {
+    const unsub = api.subscribe((data, live) => {
       setStatus(data)
-      setConnected(true)
+      setConnected(live)
     })
     return unsub
   }, [])

@@ -1,0 +1,625 @@
+{
+  "timestamp": 1770999129560,
+  "os": {
+    "platform": "linux",
+    "arch": "x64",
+    "release": "6.6.87.2-microsoft-standard-WSL2",
+    "label": "linux 6.6.87.2-microsoft-standard-WSL2 (x64)"
+  },
+  "gateway": {
+    "mode": "local",
+    "url": "ws://127.0.0.1:18789",
+    "urlSource": "local loopback",
+    "misconfigured": false,
+    "reachable": true,
+    "connectLatencyMs": 30,
+    "self": {
+      "host": "DESKTOP-1IPMTLB",
+      "ip": "172.28.160.83",
+      "version": "unknown",
+      "platform": "linux 6.6.87.2-microsoft-standard-WSL2"
+    },
+    "error": null
+  },
+  "agents": {
+    "defaultId": "main",
+    "agents": [
+      {
+        "id": "main",
+        "name": "Bl\u00e6r",
+        "workspaceDir": "/home/arnar111/.openclaw/workspace",
+        "bootstrapPending": true,
+        "sessionsPath": "/home/arnar111/.openclaw/agents/main/sessions/sessions.json",
+        "sessionsCount": 244,
+        "lastUpdatedAt": 1770999124213,
+        "lastActiveAgeMs": 4713
+      },
+      {
+        "id": "mufc",
+        "name": "Fri\u00f0rik hin Rau\u00f0i",
+        "workspaceDir": "/home/arnar111/.openclaw/workspace-mufc",
+        "bootstrapPending": false,
+        "sessionsPath": "/home/arnar111/.openclaw/agents/mufc/sessions/sessions.json",
+        "sessionsCount": 2,
+        "lastUpdatedAt": 1770751012346,
+        "lastActiveAgeMs": 248116580
+      },
+      {
+        "id": "regn",
+        "name": "Regn",
+        "workspaceDir": "/home/arnar111/.openclaw/workspace-regn",
+        "bootstrapPending": false,
+        "sessionsPath": "/home/arnar111/.openclaw/agents/regn/sessions/sessions.json",
+        "sessionsCount": 0,
+        "lastUpdatedAt": null,
+        "lastActiveAgeMs": null
+      }
+    ],
+    "totalSessions": 246,
+    "bootstrapPendingCount": 1
+  },
+  "sessions": {
+    "paths": [
+      "/home/arnar111/.openclaw/agents/main/sessions/sessions.json",
+      "/home/arnar111/.openclaw/agents/mufc/sessions/sessions.json",
+      "/home/arnar111/.openclaw/agents/regn/sessions/sessions.json"
+    ],
+    "count": 246,
+    "defaults": {
+      "model": "claude-opus-4-6",
+      "contextTokens": 200000
+    },
+    "recent": [
+      {
+        "agentId": "main",
+        "key": "agent:main:main",
+        "kind": "direct",
+        "sessionId": "658feb48-d387-4018-a90f-4ea3895ae1a7",
+        "updatedAt": 1770999124213,
+        "age": 5178,
+        "systemSent": true,
+        "abortedLastRun": false,
+        "inputTokens": 1,
+        "outputTokens": 158,
+        "totalTokens": 111828,
+        "remainingTokens": 88172,
+        "percentUsed": 56,
+        "model": "claude-opus-4-6",
+        "contextTokens": 200000,
+        "flags": [
+          "system",
+          "id:658feb48-d387-4018-a90f-4ea3895ae1a7"
+        ]
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a",
+        "kind": "direct",
+        "sessionId": "1af517f3-33e5-458a-97a8-b928343a2227",
+        "updatedAt": 1770998897989,
+        "age": 231402,
+        "systemSent": true,
+        "inputTokens": 17994,
+        "outputTokens": 600,
+        "totalTokens": 17994,
+        "remainingTokens": 382006,
+        "percentUsed": 4,
+        "model": "gpt-5-nano",
+        "contextTokens": 400000,
+        "flags": [
+          "system",
+          "id:1af517f3-33e5-458a-97a8-b928343a2227"
+        ]
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a:run:1af517f3-33e5-458a-97a8-b928343a2227",
+        "kind": "direct",
+        "sessionId": "1af517f3-33e5-458a-97a8-b928343a2227",
+        "updatedAt": 1770998897989,
+        "age": 231402,
+        "systemSent": true,
+        "inputTokens": 17994,
+        "outputTokens": 600,
+        "totalTokens": 17994,
+        "remainingTokens": 382006,
+        "percentUsed": 4,
+        "model": "gpt-5-nano",
+        "contextTokens": 400000,
+        "flags": [
+          "system",
+          "id:1af517f3-33e5-458a-97a8-b928343a2227"
+        ]
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:discord:channel:1471287901986885654",
+        "kind": "group",
+        "sessionId": "615e182b-23dc-4474-a79e-df3d00618f54",
+        "updatedAt": 1770998620757,
+        "age": 508634,
+        "systemSent": true,
+        "abortedLastRun": false,
+        "inputTokens": 3,
+        "outputTokens": 7,
+        "totalTokens": 105869,
+        "remainingTokens": 94131,
+        "percentUsed": 53,
+        "model": "claude-opus-4-6",
+        "contextTokens": 200000,
+        "flags": [
+          "system",
+          "id:615e182b-23dc-4474-a79e-df3d00618f54"
+        ]
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:cron:0d79c133-a13e-4c01-9592-5947c177d26a",
+        "kind": "direct",
+        "sessionId": "ec9b2e23-37dc-4454-ac3c-2eeb809efcc4",
+        "updatedAt": 1770998530919,
+        "age": 598472,
+        "systemSent": true,
+        "inputTokens": 22260,
+        "outputTokens": 4,
+        "totalTokens": 38543,
+        "remainingTokens": 1010033,
+        "percentUsed": 4,
+        "model": "gemini-3-flash-preview",
+        "contextTokens": 1048576,
+        "flags": [
+          "system",
+          "id:ec9b2e23-37dc-4454-ac3c-2eeb809efcc4"
+        ]
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:cron:0d79c133-a13e-4c01-9592-5947c177d26a:run:ec9b2e23-37dc-4454-ac3c-2eeb809efcc4",
+        "kind": "direct",
+        "sessionId": "ec9b2e23-37dc-4454-ac3c-2eeb809efcc4",
+        "updatedAt": 1770998530919,
+        "age": 598472,
+        "systemSent": true,
+        "inputTokens": 22260,
+        "outputTokens": 4,
+        "totalTokens": 38543,
+        "remainingTokens": 1010033,
+        "percentUsed": 4,
+        "model": "gemini-3-flash-preview",
+        "contextTokens": 1048576,
+        "flags": [
+          "system",
+          "id:ec9b2e23-37dc-4454-ac3c-2eeb809efcc4"
+        ]
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:cron:c9dd1bcf-8bc3-494e-9835-0f18d8741a16",
+        "kind": "direct",
+        "sessionId": "4f1eda7e-b759-4a05-9f13-63cad7d57177",
+        "updatedAt": 1770998400161,
+        "age": 729230,
+        "systemSent": true,
+        "inputTokens": 48782,
+        "outputTokens": 4,
+        "totalTokens": 48782,
+        "remainingTokens": 999794,
+        "percentUsed": 5,
+        "model": "gemini-3-flash-preview",
+        "contextTokens": 1048576,
+        "flags": [
+          "system",
+          "id:4f1eda7e-b759-4a05-9f13-63cad7d57177"
+        ]
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:cron:c9dd1bcf-8bc3-494e-9835-0f18d8741a16:run:4f1eda7e-b759-4a05-9f13-63cad7d57177",
+        "kind": "direct",
+        "sessionId": "4f1eda7e-b759-4a05-9f13-63cad7d57177",
+        "updatedAt": 1770998400161,
+        "age": 729230,
+        "systemSent": true,
+        "inputTokens": 48782,
+        "outputTokens": 4,
+        "totalTokens": 48782,
+        "remainingTokens": 999794,
+        "percentUsed": 5,
+        "model": "gemini-3-flash-preview",
+        "contextTokens": 1048576,
+        "flags": [
+          "system",
+          "id:4f1eda7e-b759-4a05-9f13-63cad7d57177"
+        ]
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a:run:58c942d4-fecc-4bc5-a2c6-29785d89edd8",
+        "kind": "direct",
+        "sessionId": "58c942d4-fecc-4bc5-a2c6-29785d89edd8",
+        "updatedAt": 1770997097902,
+        "age": 2031489,
+        "systemSent": true,
+        "inputTokens": 87,
+        "outputTokens": 1023,
+        "totalTokens": 20055,
+        "remainingTokens": 379945,
+        "percentUsed": 5,
+        "model": "gpt-5-nano",
+        "contextTokens": 400000,
+        "flags": [
+          "system",
+          "id:58c942d4-fecc-4bc5-a2c6-29785d89edd8"
+        ]
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a:run:c7f5326f-a1f4-4d8d-b25d-2d1e48f406dc",
+        "kind": "direct",
+        "sessionId": "c7f5326f-a1f4-4d8d-b25d-2d1e48f406dc",
+        "updatedAt": 1770995297903,
+        "age": 3831488,
+        "systemSent": true,
+        "inputTokens": 151,
+        "outputTokens": 728,
+        "totalTokens": 18327,
+        "remainingTokens": 381673,
+        "percentUsed": 5,
+        "model": "gpt-5-nano",
+        "contextTokens": 400000,
+        "flags": [
+          "system",
+          "id:c7f5326f-a1f4-4d8d-b25d-2d1e48f406dc"
+        ]
+      }
+    ],
+    "byAgent": [
+      {
+        "agentId": "main",
+        "path": "/home/arnar111/.openclaw/agents/main/sessions/sessions.json",
+        "count": 244,
+        "recent": [
+          {
+            "agentId": "main",
+            "key": "agent:main:main",
+            "kind": "direct",
+            "sessionId": "658feb48-d387-4018-a90f-4ea3895ae1a7",
+            "updatedAt": 1770999124213,
+            "age": 5178,
+            "systemSent": true,
+            "abortedLastRun": false,
+            "inputTokens": 1,
+            "outputTokens": 158,
+            "totalTokens": 111828,
+            "remainingTokens": 88172,
+            "percentUsed": 56,
+            "model": "claude-opus-4-6",
+            "contextTokens": 200000,
+            "flags": [
+              "system",
+              "id:658feb48-d387-4018-a90f-4ea3895ae1a7"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a",
+            "kind": "direct",
+            "sessionId": "1af517f3-33e5-458a-97a8-b928343a2227",
+            "updatedAt": 1770998897989,
+            "age": 231402,
+            "systemSent": true,
+            "inputTokens": 17994,
+            "outputTokens": 600,
+            "totalTokens": 17994,
+            "remainingTokens": 382006,
+            "percentUsed": 4,
+            "model": "gpt-5-nano",
+            "contextTokens": 400000,
+            "flags": [
+              "system",
+              "id:1af517f3-33e5-458a-97a8-b928343a2227"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a:run:1af517f3-33e5-458a-97a8-b928343a2227",
+            "kind": "direct",
+            "sessionId": "1af517f3-33e5-458a-97a8-b928343a2227",
+            "updatedAt": 1770998897989,
+            "age": 231402,
+            "systemSent": true,
+            "inputTokens": 17994,
+            "outputTokens": 600,
+            "totalTokens": 17994,
+            "remainingTokens": 382006,
+            "percentUsed": 4,
+            "model": "gpt-5-nano",
+            "contextTokens": 400000,
+            "flags": [
+              "system",
+              "id:1af517f3-33e5-458a-97a8-b928343a2227"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:discord:channel:1471287901986885654",
+            "kind": "group",
+            "sessionId": "615e182b-23dc-4474-a79e-df3d00618f54",
+            "updatedAt": 1770998620757,
+            "age": 508634,
+            "systemSent": true,
+            "abortedLastRun": false,
+            "inputTokens": 3,
+            "outputTokens": 7,
+            "totalTokens": 105869,
+            "remainingTokens": 94131,
+            "percentUsed": 53,
+            "model": "claude-opus-4-6",
+            "contextTokens": 200000,
+            "flags": [
+              "system",
+              "id:615e182b-23dc-4474-a79e-df3d00618f54"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:cron:0d79c133-a13e-4c01-9592-5947c177d26a",
+            "kind": "direct",
+            "sessionId": "ec9b2e23-37dc-4454-ac3c-2eeb809efcc4",
+            "updatedAt": 1770998530919,
+            "age": 598472,
+            "systemSent": true,
+            "inputTokens": 22260,
+            "outputTokens": 4,
+            "totalTokens": 38543,
+            "remainingTokens": 1010033,
+            "percentUsed": 4,
+            "model": "gemini-3-flash-preview",
+            "contextTokens": 1048576,
+            "flags": [
+              "system",
+              "id:ec9b2e23-37dc-4454-ac3c-2eeb809efcc4"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:cron:0d79c133-a13e-4c01-9592-5947c177d26a:run:ec9b2e23-37dc-4454-ac3c-2eeb809efcc4",
+            "kind": "direct",
+            "sessionId": "ec9b2e23-37dc-4454-ac3c-2eeb809efcc4",
+            "updatedAt": 1770998530919,
+            "age": 598472,
+            "systemSent": true,
+            "inputTokens": 22260,
+            "outputTokens": 4,
+            "totalTokens": 38543,
+            "remainingTokens": 1010033,
+            "percentUsed": 4,
+            "model": "gemini-3-flash-preview",
+            "contextTokens": 1048576,
+            "flags": [
+              "system",
+              "id:ec9b2e23-37dc-4454-ac3c-2eeb809efcc4"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:cron:c9dd1bcf-8bc3-494e-9835-0f18d8741a16",
+            "kind": "direct",
+            "sessionId": "4f1eda7e-b759-4a05-9f13-63cad7d57177",
+            "updatedAt": 1770998400161,
+            "age": 729230,
+            "systemSent": true,
+            "inputTokens": 48782,
+            "outputTokens": 4,
+            "totalTokens": 48782,
+            "remainingTokens": 999794,
+            "percentUsed": 5,
+            "model": "gemini-3-flash-preview",
+            "contextTokens": 1048576,
+            "flags": [
+              "system",
+              "id:4f1eda7e-b759-4a05-9f13-63cad7d57177"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:cron:c9dd1bcf-8bc3-494e-9835-0f18d8741a16:run:4f1eda7e-b759-4a05-9f13-63cad7d57177",
+            "kind": "direct",
+            "sessionId": "4f1eda7e-b759-4a05-9f13-63cad7d57177",
+            "updatedAt": 1770998400161,
+            "age": 729230,
+            "systemSent": true,
+            "inputTokens": 48782,
+            "outputTokens": 4,
+            "totalTokens": 48782,
+            "remainingTokens": 999794,
+            "percentUsed": 5,
+            "model": "gemini-3-flash-preview",
+            "contextTokens": 1048576,
+            "flags": [
+              "system",
+              "id:4f1eda7e-b759-4a05-9f13-63cad7d57177"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a:run:58c942d4-fecc-4bc5-a2c6-29785d89edd8",
+            "kind": "direct",
+            "sessionId": "58c942d4-fecc-4bc5-a2c6-29785d89edd8",
+            "updatedAt": 1770997097902,
+            "age": 2031489,
+            "systemSent": true,
+            "inputTokens": 87,
+            "outputTokens": 1023,
+            "totalTokens": 20055,
+            "remainingTokens": 379945,
+            "percentUsed": 5,
+            "model": "gpt-5-nano",
+            "contextTokens": 400000,
+            "flags": [
+              "system",
+              "id:58c942d4-fecc-4bc5-a2c6-29785d89edd8"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a:run:c7f5326f-a1f4-4d8d-b25d-2d1e48f406dc",
+            "kind": "direct",
+            "sessionId": "c7f5326f-a1f4-4d8d-b25d-2d1e48f406dc",
+            "updatedAt": 1770995297903,
+            "age": 3831488,
+            "systemSent": true,
+            "inputTokens": 151,
+            "outputTokens": 728,
+            "totalTokens": 18327,
+            "remainingTokens": 381673,
+            "percentUsed": 5,
+            "model": "gpt-5-nano",
+            "contextTokens": 400000,
+            "flags": [
+              "system",
+              "id:c7f5326f-a1f4-4d8d-b25d-2d1e48f406dc"
+            ]
+          }
+        ]
+      },
+      {
+        "agentId": "mufc",
+        "path": "/home/arnar111/.openclaw/agents/mufc/sessions/sessions.json",
+        "count": 2,
+        "recent": [
+          {
+            "agentId": "mufc",
+            "key": "agent:mufc:main",
+            "kind": "direct",
+            "sessionId": "8e5e5ad7-28d7-4fe2-b3c1-abb1e364b367",
+            "updatedAt": 1770751012346,
+            "age": 248117045,
+            "abortedLastRun": false,
+            "inputTokens": 12764,
+            "outputTokens": 112,
+            "totalTokens": 12764,
+            "remainingTokens": 1035812,
+            "percentUsed": 1,
+            "model": "gemini-3-flash-preview",
+            "contextTokens": 1048576,
+            "flags": [
+              "id:8e5e5ad7-28d7-4fe2-b3c1-abb1e364b367"
+            ]
+          },
+          {
+            "agentId": "mufc",
+            "key": "agent:mufc:discord:channel:1470840851289608372",
+            "kind": "group",
+            "sessionId": "25a78794-75fb-4417-ae24-68f3f071dde7",
+            "updatedAt": 1770751009678,
+            "age": 248119713,
+            "totalTokens": 0,
+            "remainingTokens": 200000,
+            "percentUsed": 0,
+            "model": "claude-opus-4-6",
+            "contextTokens": 200000,
+            "flags": [
+              "id:25a78794-75fb-4417-ae24-68f3f071dde7"
+            ]
+          }
+        ]
+      },
+      {
+        "agentId": "regn",
+        "path": "/home/arnar111/.openclaw/agents/regn/sessions/sessions.json",
+        "count": 0,
+        "recent": []
+      }
+    ]
+  },
+  "heartbeat": {
+    "defaultAgentId": "main",
+    "agents": [
+      {
+        "agentId": "main",
+        "enabled": true,
+        "every": "1h",
+        "everyMs": 3600000
+      },
+      {
+        "agentId": "mufc",
+        "enabled": false,
+        "every": "disabled",
+        "everyMs": null
+      },
+      {
+        "agentId": "regn",
+        "enabled": false,
+        "every": "disabled",
+        "everyMs": null
+      }
+    ]
+  },
+  "memory": {
+    "agentId": "main",
+    "backend": "builtin",
+    "files": 38,
+    "chunks": 1195,
+    "dirty": true,
+    "workspaceDir": "/home/arnar111/.openclaw/workspace",
+    "dbPath": "/home/arnar111/.openclaw/memory/main.sqlite",
+    "provider": "openai",
+    "model": "text-embedding-3-small",
+    "requestedProvider": "auto",
+    "sources": [
+      "memory",
+      "sessions"
+    ],
+    "extraPaths": [],
+    "sourceCounts": [
+      {
+        "source": "memory",
+        "files": 23,
+        "chunks": 86
+      },
+      {
+        "source": "sessions",
+        "files": 15,
+        "chunks": 1109
+      }
+    ],
+    "cache": {
+      "enabled": true,
+      "entries": 1587
+    },
+    "fts": {
+      "enabled": true,
+      "available": true
+    },
+    "vector": {
+      "enabled": true,
+      "available": true,
+      "extensionPath": "/usr/lib/node_modules/openclaw/node_modules/sqlite-vec-linux-x64/vec0.so",
+      "dims": 1536
+    },
+    "batch": {
+      "enabled": true,
+      "failures": 0,
+      "limit": 2,
+      "wait": true,
+      "concurrency": 2,
+      "pollIntervalMs": 2000,
+      "timeoutMs": 3600000
+    }
+  },
+  "disk": {
+    "totalGb": 1007,
+    "usedGb": 20,
+    "freeGb": 937,
+    "percentUsed": 3
+  },
+  "channels": {
+    "whatsapp": {
+      "linked": true
+    },
+    "discord": {
+      "configured": true
+    }
+  }
+}
