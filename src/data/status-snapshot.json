@@ -1,5 +1,5 @@
 {
-  "timestamp": 1770999273522,
+  "timestamp": 1770999817059,
   "os": {
     "platform": "linux",
     "arch": "x64",
@@ -12,7 +12,7 @@
     "urlSource": "local loopback",
     "misconfigured": false,
     "reachable": true,
-    "connectLatencyMs": 30,
+    "connectLatencyMs": 27,
     "self": {
       "host": "DESKTOP-1IPMTLB",
       "ip": "172.28.160.83",
@@ -31,8 +31,18 @@
         "bootstrapPending": true,
         "sessionsPath": "/home/arnar111/.openclaw/agents/main/sessions/sessions.json",
         "sessionsCount": 244,
-        "lastUpdatedAt": 1770999239789,
-        "lastActiveAgeMs": 33279
+        "lastUpdatedAt": 1770999796740,
+        "lastActiveAgeMs": 19869
+      },
+      {
+        "id": "frost",
+        "name": "Frost",
+        "workspaceDir": "/home/arnar111/.openclaw/workspace-frost",
+        "bootstrapPending": false,
+        "sessionsPath": "/home/arnar111/.openclaw/agents/frost/sessions/sessions.json",
+        "sessionsCount": 0,
+        "lastUpdatedAt": null,
+        "lastActiveAgeMs": null
       },
       {
         "id": "mufc",
@@ -42,7 +52,7 @@
         "sessionsPath": "/home/arnar111/.openclaw/agents/mufc/sessions/sessions.json",
         "sessionsCount": 2,
         "lastUpdatedAt": 1770751012346,
-        "lastActiveAgeMs": 248260722
+        "lastActiveAgeMs": 248804263
       },
       {
         "id": "regn",
@@ -50,6 +60,26 @@
         "workspaceDir": "/home/arnar111/.openclaw/workspace-regn",
         "bootstrapPending": false,
         "sessionsPath": "/home/arnar111/.openclaw/agents/regn/sessions/sessions.json",
+        "sessionsCount": 0,
+        "lastUpdatedAt": null,
+        "lastActiveAgeMs": null
+      },
+      {
+        "id": "stormur",
+        "name": "Stormur",
+        "workspaceDir": "/home/arnar111/.openclaw/workspace-stormur",
+        "bootstrapPending": false,
+        "sessionsPath": "/home/arnar111/.openclaw/agents/stormur/sessions/sessions.json",
+        "sessionsCount": 0,
+        "lastUpdatedAt": null,
+        "lastActiveAgeMs": null
+      },
+      {
+        "id": "ylur",
+        "name": "Ylur",
+        "workspaceDir": "/home/arnar111/.openclaw/workspace-ylur",
+        "bootstrapPending": false,
+        "sessionsPath": "/home/arnar111/.openclaw/agents/ylur/sessions/sessions.json",
         "sessionsCount": 0,
         "lastUpdatedAt": null,
         "lastActiveAgeMs": null
@@ -61,8 +91,11 @@
   "sessions": {
     "paths": [
       "/home/arnar111/.openclaw/agents/main/sessions/sessions.json",
+      "/home/arnar111/.openclaw/agents/frost/sessions/sessions.json",
       "/home/arnar111/.openclaw/agents/mufc/sessions/sessions.json",
-      "/home/arnar111/.openclaw/agents/regn/sessions/sessions.json"
+      "/home/arnar111/.openclaw/agents/regn/sessions/sessions.json",
+      "/home/arnar111/.openclaw/agents/stormur/sessions/sessions.json",
+      "/home/arnar111/.openclaw/agents/ylur/sessions/sessions.json"
     ],
     "count": 246,
     "defaults": {
@@ -75,15 +108,15 @@
         "key": "agent:main:main",
         "kind": "direct",
         "sessionId": "658feb48-d387-4018-a90f-4ea3895ae1a7",
-        "updatedAt": 1770999239789,
-        "age": 33570,
+        "updatedAt": 1770999796740,
+        "age": 20157,
         "systemSent": true,
         "abortedLastRun": false,
         "inputTokens": 1,
-        "outputTokens": 142,
-        "totalTokens": 114605,
-        "remainingTokens": 85395,
-        "percentUsed": 57,
+        "outputTokens": 276,
+        "totalTokens": 126407,
+        "remainingTokens": 73593,
+        "percentUsed": 63,
         "model": "claude-opus-4-6",
         "contextTokens": 200000,
         "flags": [
@@ -97,7 +130,7 @@
         "kind": "direct",
         "sessionId": "1af517f3-33e5-458a-97a8-b928343a2227",
         "updatedAt": 1770998897989,
-        "age": 375370,
+        "age": 918908,
         "systemSent": true,
         "inputTokens": 17994,
         "outputTokens": 600,
@@ -117,7 +150,7 @@
         "kind": "direct",
         "sessionId": "1af517f3-33e5-458a-97a8-b928343a2227",
         "updatedAt": 1770998897989,
-        "age": 375370,
+        "age": 918908,
         "systemSent": true,
         "inputTokens": 17994,
         "outputTokens": 600,
@@ -137,7 +170,7 @@
         "kind": "group",
         "sessionId": "615e182b-23dc-4474-a79e-df3d00618f54",
         "updatedAt": 1770998620757,
-        "age": 652602,
+        "age": 1196140,
         "systemSent": true,
         "abortedLastRun": false,
         "inputTokens": 3,
@@ -158,7 +191,7 @@
         "kind": "direct",
         "sessionId": "ec9b2e23-37dc-4454-ac3c-2eeb809efcc4",
         "updatedAt": 1770998530919,
-        "age": 742440,
+        "age": 1285978,
         "systemSent": true,
         "inputTokens": 22260,
         "outputTokens": 4,
@@ -178,7 +211,7 @@
         "kind": "direct",
         "sessionId": "ec9b2e23-37dc-4454-ac3c-2eeb809efcc4",
         "updatedAt": 1770998530919,
-        "age": 742440,
+        "age": 1285978,
         "systemSent": true,
         "inputTokens": 22260,
         "outputTokens": 4,
@@ -198,7 +231,7 @@
         "kind": "direct",
         "sessionId": "4f1eda7e-b759-4a05-9f13-63cad7d57177",
         "updatedAt": 1770998400161,
-        "age": 873198,
+        "age": 1416736,
         "systemSent": true,
         "inputTokens": 48782,
         "outputTokens": 4,
@@ -218,7 +251,7 @@
         "kind": "direct",
         "sessionId": "4f1eda7e-b759-4a05-9f13-63cad7d57177",
         "updatedAt": 1770998400161,
-        "age": 873198,
+        "age": 1416736,
         "systemSent": true,
         "inputTokens": 48782,
         "outputTokens": 4,
@@ -238,7 +271,7 @@
         "kind": "direct",
         "sessionId": "58c942d4-fecc-4bc5-a2c6-29785d89edd8",
         "updatedAt": 1770997097902,
-        "age": 2175457,
+        "age": 2718995,
         "systemSent": true,
         "inputTokens": 87,
         "outputTokens": 1023,
@@ -258,7 +291,7 @@
         "kind": "direct",
         "sessionId": "c7f5326f-a1f4-4d8d-b25d-2d1e48f406dc",
         "updatedAt": 1770995297903,
-        "age": 3975456,
+        "age": 4518994,
         "systemSent": true,
         "inputTokens": 151,
         "outputTokens": 728,
@@ -284,15 +317,15 @@
             "key": "agent:main:main",
             "kind": "direct",
             "sessionId": "658feb48-d387-4018-a90f-4ea3895ae1a7",
-            "updatedAt": 1770999239789,
-            "age": 33570,
+            "updatedAt": 1770999796740,
+            "age": 20157,
             "systemSent": true,
             "abortedLastRun": false,
             "inputTokens": 1,
-            "outputTokens": 142,
-            "totalTokens": 114605,
-            "remainingTokens": 85395,
-            "percentUsed": 57,
+            "outputTokens": 276,
+            "totalTokens": 126407,
+            "remainingTokens": 73593,
+            "percentUsed": 63,
             "model": "claude-opus-4-6",
             "contextTokens": 200000,
             "flags": [
@@ -306,7 +339,7 @@
             "kind": "direct",
             "sessionId": "1af517f3-33e5-458a-97a8-b928343a2227",
             "updatedAt": 1770998897989,
-            "age": 375370,
+            "age": 918908,
             "systemSent": true,
             "inputTokens": 17994,
             "outputTokens": 600,
@@ -326,7 +359,7 @@
             "kind": "direct",
             "sessionId": "1af517f3-33e5-458a-97a8-b928343a2227",
             "updatedAt": 1770998897989,
-            "age": 375370,
+            "age": 918908,
             "systemSent": true,
             "inputTokens": 17994,
             "outputTokens": 600,
@@ -346,7 +379,7 @@
             "kind": "group",
             "sessionId": "615e182b-23dc-4474-a79e-df3d00618f54",
             "updatedAt": 1770998620757,
-            "age": 652602,
+            "age": 1196140,
             "systemSent": true,
             "abortedLastRun": false,
             "inputTokens": 3,
@@ -367,7 +400,7 @@
             "kind": "direct",
             "sessionId": "ec9b2e23-37dc-4454-ac3c-2eeb809efcc4",
             "updatedAt": 1770998530919,
-            "age": 742440,
+            "age": 1285978,
             "systemSent": true,
             "inputTokens": 22260,
             "outputTokens": 4,
@@ -387,7 +420,7 @@
             "kind": "direct",
             "sessionId": "ec9b2e23-37dc-4454-ac3c-2eeb809efcc4",
             "updatedAt": 1770998530919,
-            "age": 742440,
+            "age": 1285978,
             "systemSent": true,
             "inputTokens": 22260,
             "outputTokens": 4,
@@ -407,7 +440,7 @@
             "kind": "direct",
             "sessionId": "4f1eda7e-b759-4a05-9f13-63cad7d57177",
             "updatedAt": 1770998400161,
-            "age": 873198,
+            "age": 1416736,
             "systemSent": true,
             "inputTokens": 48782,
             "outputTokens": 4,
@@ -427,7 +460,7 @@
             "kind": "direct",
             "sessionId": "4f1eda7e-b759-4a05-9f13-63cad7d57177",
             "updatedAt": 1770998400161,
-            "age": 873198,
+            "age": 1416736,
             "systemSent": true,
             "inputTokens": 48782,
             "outputTokens": 4,
@@ -447,7 +480,7 @@
             "kind": "direct",
             "sessionId": "58c942d4-fecc-4bc5-a2c6-29785d89edd8",
             "updatedAt": 1770997097902,
-            "age": 2175457,
+            "age": 2718995,
             "systemSent": true,
             "inputTokens": 87,
             "outputTokens": 1023,
@@ -467,7 +500,7 @@
             "kind": "direct",
             "sessionId": "c7f5326f-a1f4-4d8d-b25d-2d1e48f406dc",
             "updatedAt": 1770995297903,
-            "age": 3975456,
+            "age": 4518994,
             "systemSent": true,
             "inputTokens": 151,
             "outputTokens": 728,
@@ -484,6 +517,12 @@
         ]
       },
       {
+        "agentId": "frost",
+        "path": "/home/arnar111/.openclaw/agents/frost/sessions/sessions.json",
+        "count": 0,
+        "recent": []
+      },
+      {
         "agentId": "mufc",
         "path": "/home/arnar111/.openclaw/agents/mufc/sessions/sessions.json",
         "count": 2,
@@ -494,7 +533,7 @@
             "kind": "direct",
             "sessionId": "8e5e5ad7-28d7-4fe2-b3c1-abb1e364b367",
             "updatedAt": 1770751012346,
-            "age": 248261013,
+            "age": 248804551,
             "abortedLastRun": false,
             "inputTokens": 12764,
             "outputTokens": 112,
@@ -513,7 +552,7 @@
             "kind": "group",
             "sessionId": "25a78794-75fb-4417-ae24-68f3f071dde7",
             "updatedAt": 1770751009678,
-            "age": 248263681,
+            "age": 248807219,
             "totalTokens": 0,
             "remainingTokens": 200000,
             "percentUsed": 0,
@@ -530,6 +569,18 @@
         "path": "/home/arnar111/.openclaw/agents/regn/sessions/sessions.json",
         "count": 0,
         "recent": []
+      },
+      {
+        "agentId": "stormur",
+        "path": "/home/arnar111/.openclaw/agents/stormur/sessions/sessions.json",
+        "count": 0,
+        "recent": []
+      },
+      {
+        "agentId": "ylur",
+        "path": "/home/arnar111/.openclaw/agents/ylur/sessions/sessions.json",
+        "count": 0,
+        "recent": []
       }
     ]
   },
@@ -543,6 +594,12 @@
         "everyMs": 3600000
       },
       {
+        "agentId": "frost",
+        "enabled": false,
+        "every": "disabled",
+        "everyMs": null
+      },
+      {
         "agentId": "mufc",
         "enabled": false,
         "every": "disabled",
@@ -550,6 +607,18 @@
       },
       {
         "agentId": "regn",
+        "enabled": false,
+        "every": "disabled",
+        "everyMs": null
+      },
+      {
+        "agentId": "stormur",
+        "enabled": false,
+        "every": "disabled",
+        "everyMs": null
+      },
+      {
+        "agentId": "ylur",
         "enabled": false,
         "every": "disabled",
         "everyMs": null
