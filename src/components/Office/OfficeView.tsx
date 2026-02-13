@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { agents, Agent } from '../../data/agents'
+import { useLiveAgents } from '../../hooks/useOpenClaw'
 
 // Office layout positions for each agent's desk
 const deskPositions: Record<string, { x: number; y: number }> = {
@@ -275,6 +276,13 @@ function shadeColor(color: string, amount: number): string {
 export default function OfficeView() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animRef = useRef<number>(0)
+  const { agents: liveAgents } = useLiveAgents()
+
+  // Merge live status into static agents for rendering
+  const mergedAgents = agents.map(a => {
+    const live = liveAgents.find(la => la.id === a.id)
+    return live ? { ...a, status: live.status, currentTask: live.currentTask } : a
+  })
 
   const draw = useCallback((time: number) => {
     const canvas = canvasRef.current
@@ -305,7 +313,7 @@ export default function OfficeView() {
     drawCoffeeMachine(ctx, W * 0.12, H * 0.85, time)
 
     // Desks and agents
-    agents.forEach((agent) => {
+    mergedAgents.forEach((agent) => {
       const pos = deskPositions[agent.id]
       if (!pos) return
       const dx = pos.x * W, dy = pos.y * H
