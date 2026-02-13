@@ -93,7 +93,7 @@ export function useLiveAgents(): { agents: LiveAgent[]; connected: boolean } {
     if (lastSession) {
       if (lastSession.age < 120000) liveStatus = 'active'
       else if (lastSession.age < 600000) liveStatus = 'idle'
-      else if (lastSession.age < 3600000) liveStatus = 'idle' // within 1hr = idle
+      else if (lastSession.age < 3600000) liveStatus = 'idle'
     }
 
     // For Frost: also check if any subagent ran recently
@@ -102,6 +102,15 @@ export function useLiveAgents(): { agents: LiveAgent[]; connected: boolean } {
         s => s.key.includes('subagent') && s.age < 3600000
       )
       if (anySubagent) liveStatus = 'idle'
+    }
+
+    // If agent is configured in OpenClaw but has no recent sessions,
+    // show as idle (standby) rather than offline
+    if (liveStatus === 'offline') {
+      const isConfigured = openclawId 
+        ? status.agents?.list?.some((a: { id: string }) => a.id === openclawId)
+        : ['frost', 'ylur', 'stormur'].includes(agent.id) // team members always configured
+      if (isConfigured) liveStatus = 'idle'
     }
 
     // Get model from config
