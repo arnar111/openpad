@@ -23,7 +23,10 @@ CHANNELS = {
         "desc": "Kóði og tækni",
     },
 }
-WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
+WEBHOOKS = {
+    "adalras": os.environ.get("DISCORD_WEBHOOK_ADALRAS", ""),
+    "devchannel": os.environ.get("DISCORD_WEBHOOK_DEVCHANNEL", ""),
+}
 
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public", "data")
 POLL_INTERVAL = 10  # seconds
@@ -167,18 +170,13 @@ class SendHandler(BaseHTTPRequestHandler):
                 "content": text,
             }).encode()
             
-            # Use webhook for #aðalrás, bot API for others
-            if channel_slug == "adalras":
-                send_url = WEBHOOK_URL
-                req = Request(send_url, data=json.dumps({"content": text, "username": username}).encode(), method="POST")
-                req.add_header("Content-Type", "application/json")
-            else:
-                send_url = f"https://discord.com/api/v10/channels/{target_channel_id}/messages"
-                req = Request(send_url, data=payload, method="POST")
-                req.add_header("Content-Type", "application/json")
-                req.add_header("Authorization", f"Bot {BOT_TOKEN}")
-                req.add_header("User-Agent", "OpenPad-Bridge/1.0")
+            webhook_url = WEBHOOKS.get(channel_slug, WEBHOOKS.get("adalras", ""))
+            if not webhook_url:
+                self._respond(500, {"error": "No webhook for channel"})
+                return
             
+            req = Request(webhook_url, data=json.dumps({"content": text, "username": username}).encode(), method="POST")
+            req.add_header("Content-Type", "application/json")
             try:
                 with urlopen(req) as resp:
                     self._respond(200, {"ok": True})
