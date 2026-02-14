@@ -35,7 +35,9 @@ interface DisplayMessage {
   attachments?: string[]
 }
 
-const BRIDGE_SEND_URL = `http://${window.location.hostname}:5181/send`
+const BRIDGE_HOST = `http://172.28.160.83:5181`
+const BRIDGE_SEND_URL = `${BRIDGE_HOST}/send`
+const BRIDGE_MESSAGES_URL = `${BRIDGE_HOST}/messages`
 const POLL_INTERVAL = 5000
 
 const CHANNEL_ORDER = ['adalras', 'devchannel']
@@ -179,7 +181,13 @@ export default function ChatRoom() {
 
   const fetchMessages = useCallback(async () => {
     try {
-      const resp = await fetch('/data/discord-messages.json?' + Date.now())
+      // Try bridge API first (works from Netlify), fall back to local file
+      let resp: Response
+      try {
+        resp = await fetch(BRIDGE_MESSAGES_URL + '?' + Date.now())
+      } catch {
+        resp = await fetch('/data/discord-messages.json?' + Date.now())
+      }
       if (!resp.ok) return
       const data: DiscordData = await resp.json()
       setChannelData(data.channels || {})

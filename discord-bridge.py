@@ -120,22 +120,32 @@ def poll_loop():
                         print(f"{ts} ✅ #{ch['name']}: {len(msgs)} messages")
                         last_counts[slug] = len(msgs)
 
-            data = {
+            global latest_data
+            latest_data = {
                 "guildId": GUILD_ID,
                 "updatedAt": datetime.now(timezone.utc).isoformat(),
                 "channels": all_channels,
             }
+            # Also write to file for local dev
             out = os.path.join(OUTPUT_DIR, "discord-messages.json")
             with open(out, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
+                json.dump(latest_data, f, ensure_ascii=False, indent=2)
         except Exception as e:
             print(f"Poll error: {e}")
         
         time.sleep(POLL_INTERVAL)
 
 
+latest_data = {}
+
 class SendHandler(BaseHTTPRequestHandler):
-    """HTTP handler for sending messages via webhook."""
+    """HTTP handler for sending messages + serving data."""
+    
+    def do_GET(self):
+        if self.path.startswith("/messages"):
+            self._respond(200, latest_data)
+        else:
+            self._respond(404, {"error": "Not found"})
     
     def do_POST(self):
         if self.path == "/send":
