@@ -129,22 +129,27 @@ export function useLiveAgents(): { agents: LiveAgent[]; connected: boolean } {
     } else if (agentSessions.length === 0) {
       task = 'Standby'
     } else {
-      // Categorize sessions
-      const discordSessions = agentSessions.filter(s => s.key.includes('discord'))
-      const cronSessions = agentSessions.filter(s => s.key.includes('cron'))
-      const mainSessions = agentSessions.filter(s => s.key.includes(':main') && !s.key.includes('cron') && !s.key.includes('discord'))
-      const subagentSessions = agentSessions.filter(s => s.key.includes('subagent') || s.key.includes('spawn'))
+      // Show the most recent session's displayName if available
+      const recentWithName = agentSessions
+        .filter(s => (s as any).displayName)
+        .sort((a, b) => b.updatedAt - a.updatedAt)
 
-      const parts: string[] = []
-      if (mainSessions.length > 0) parts.push('Direct chat')
-      if (discordSessions.length > 0) parts.push(`Discord (${discordSessions.length} ch)`)
-      if (cronSessions.length > 0) parts.push(`${cronSessions.length} cron jobs`)
-      if (subagentSessions.length > 0) parts.push(`${subagentSessions.length} sub-tasks`)
-
-      if (parts.length > 0) {
-        task = parts.join(' · ')
+      if (recentWithName.length > 0) {
+        const recent = recentWithName[0] as any
+        const others = recentWithName.length - 1
+        task = recent.displayName + (others > 0 ? ` +${others} more` : '')
       } else {
-        task = `${agentSessions.length} session${agentSessions.length > 1 ? 's' : ''}`
+        // Fallback: categorize sessions
+        const discordSessions = agentSessions.filter(s => s.key.includes('discord'))
+        const cronSessions = agentSessions.filter(s => s.key.includes('cron'))
+        const mainSessions = agentSessions.filter(s => s.key.includes(':main') && !s.key.includes('cron') && !s.key.includes('discord'))
+
+        const parts: string[] = []
+        if (mainSessions.length > 0) parts.push('Direct session')
+        if (discordSessions.length > 0) parts.push(`Discord (${discordSessions.length} ch)`)
+        if (cronSessions.length > 0) parts.push(`${cronSessions.length} cron jobs`)
+
+        task = parts.length > 0 ? parts.join(' · ') : `${agentSessions.length} sessions`
       }
 
       // Add token activity indicator

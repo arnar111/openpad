@@ -53,12 +53,59 @@ async function update() {
       }
     } catch {}
 
+    // Cron name lookup (from known cron jobs — update when jobs change)
+    const cronNames = {
+      '788c5c26-f88a-49b6-b744-aa2920a8da7a': 'Email check',
+      '2ea4d6e9-a870-4c04-b453-41c7646e235a': 'Back reset reminder',
+      'c517159c-8d7f-44d5-8511-4f017480b6dd': 'MUFC News',
+      '9e2361a3-8596-45d2-b7b9-7bb7f7901e6d': 'MUFC Transfers',
+      'a0427e24-c51b-4bfd-adc9-71d312e5ac42': 'MUFC Transfer News',
+      'd955c9d2-bcf5-45c6-a49f-a7ee196f0c1a': 'MUFC X Report',
+      '0d79c133-a13e-4c01-9592-5947c177d26a': 'Frost check-in',
+      '81cbe8fa-0f01-452f-9bf2-444a642f43de': 'Team sync',
+      '341435bf-3bf0-4113-8a0b-55f2d9aee251': 'Fréttir 18:00',
+      'd94723f0-ad30-4947-98ce-d506a7ac6fd3': 'Fréttir 12:00',
+      '6e895c49-56a9-4c76-9518-3e006c8ab2d8': 'Daily Brief',
+      'fc41b5d0-81aa-486d-971b-3931c03567e5': 'MUFC GameDay',
+      'bf69b771-081a-4e65-85d7-34bc1dd4eaea': 'Heimamatur 17:30',
+      '0d966acc-bda4-4f6d-a28e-730b5a477331': 'Heimamatur 12:30',
+      'e921cf6e-db83-47a0-81e2-73f5138dd89e': 'Overnight Dev',
+      '4943daeb-9aa8-4b37-b91d-7e00f263f989': 'ArnarFlow improvements',
+      '4f6eca6e-fef8-4bfc-8526-f294ef592227': 'OpenPad Bridge',
+      '87e706a8-a351-4171-a8fb-beba16928551': 'Memory Maintenance',
+    }
+
+    // Enrich sessions with labels
+    const enrichedSessions = { ...raw.sessions }
+    if (enrichedSessions.recent) {
+      enrichedSessions.recent = enrichedSessions.recent.map(s => {
+        const enriched = { ...s }
+        const key = s.key || ''
+        
+        // Add displayName based on session key patterns
+        if (key.includes('discord:channel:1471287901986885654')) {
+          enriched.displayName = '#aðalrás'
+        } else if (key.includes('discord:channel:1472223401979412532')) {
+          enriched.displayName = '#devchannel'
+        } else if (key.includes(':main:main')) {
+          enriched.displayName = 'WhatsApp (Arnar)'
+        } else if (key.match(/cron:([a-f0-9-]+)/)) {
+          const cronId = key.match(/cron:([a-f0-9-]+)/)[1]
+          enriched.displayName = cronNames[cronId] || `Cron job`
+        } else if (key.includes(':main') && !key.includes('cron')) {
+          enriched.displayName = 'Direct session'
+        }
+
+        return enriched
+      })
+    }
+
     const status = {
       timestamp: Date.now(),
       os: raw.os || {},
       gateway: raw.gateway || {},
       agents: raw.agents || {},
-      sessions: raw.sessions || {},
+      sessions: enrichedSessions,
       heartbeat: raw.heartbeat || {},
       memory: raw.memory || {},
       disk,
