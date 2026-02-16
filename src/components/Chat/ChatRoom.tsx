@@ -35,7 +35,7 @@ interface DisplayMessage {
   attachments?: string[]
 }
 
-const BRIDGE_HOST = `http://172.28.160.83:5181`
+const BRIDGE_HOST = import.meta.env.VITE_BRIDGE_URL || `http://${window.location.hostname}:5181`
 const BRIDGE_SEND_URL = `${BRIDGE_HOST}/send`
 const BRIDGE_MESSAGES_URL = `${BRIDGE_HOST}/messages`
 const POLL_INTERVAL = 5000

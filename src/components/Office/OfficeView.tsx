@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import { agents, Agent } from '../../data/agents'
 import { useLiveAgents } from '../../hooks/useOpenClaw'
 
@@ -7,9 +7,11 @@ const deskPositions: Record<string, { x: number; y: number }> = {
   arnar:   { x: 0.12, y: 0.18 },
   blaer:   { x: 0.50, y: 0.22 },
   frost:   { x: 0.82, y: 0.18 },
-  regn:    { x: 0.18, y: 0.62 },
-  ylur:    { x: 0.72, y: 0.62 },
-  stormur: { x: 0.88, y: 0.55 },
+  regn:    { x: 0.18, y: 0.55 },
+  ylur:    { x: 0.72, y: 0.55 },
+  stormur: { x: 0.88, y: 0.48 },
+  dogg:    { x: 0.30, y: 0.72 },
+  udi:     { x: 0.58, y: 0.72 },
 }
 
 // Furniture
@@ -277,6 +279,7 @@ export default function OfficeView() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animRef = useRef<number>(0)
   const { agents: liveAgents } = useLiveAgents()
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
 
   // Merge live status into static agents for rendering
   const mergedAgents = agents.map(a => {
@@ -353,15 +356,70 @@ export default function OfficeView() {
     window.addEventListener('resize', resize)
     animRef.current = requestAnimationFrame(draw)
 
+    // Click detection
+    const handleClick = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      const cx = e.clientX - rect.left
+      const cy = e.clientY - rect.top
+      const W = rect.width
+      const H = rect.height
+
+      let found: Agent | null = null
+      for (const agent of mergedAgents) {
+        const pos = deskPositions[agent.id]
+        if (!pos) continue
+        const ax = pos.x * W
+        const ay = pos.y * H - 30
+        if (Math.abs(cx - ax) < 40 && Math.abs(cy - ay) < 40) {
+          found = agent
+          break
+        }
+      }
+      setSelectedAgent(found)
+    }
+
+    canvas.addEventListener('click', handleClick)
+
     return () => {
       window.removeEventListener('resize', resize)
+      canvas.removeEventListener('click', handleClick)
       cancelAnimationFrame(animRef.current)
     }
-  }, [draw])
+  }, [draw, mergedAgents])
+
+  const statusLabel = (s: string) => s === 'active' ? '🟢 Active' : s === 'idle' ? '🟡 Idle' : '🔴 Offline'
 
   return (
     <div className="w-full h-full relative">
       <canvas ref={canvasRef} className="w-full h-full" />
+      {selectedAgent && (
+        <div
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 px-6 py-4 rounded-xl border animate-slide-up backdrop-blur-sm cursor-pointer"
+          style={{
+            background: `linear-gradient(135deg, ${selectedAgent.color}15, rgba(17,17,40,0.95))`,
+            borderColor: selectedAgent.color + '40',
+            boxShadow: `0 0 30px ${selectedAgent.color}20`,
+          }}
+          onClick={() => setSelectedAgent(null)}
+        >
+          <div className="flex items-center gap-4">
+            <span className="text-3xl">{selectedAgent.emoji}</span>
+            <div>
+              <div className="font-pixel text-[11px]" style={{ color: selectedAgent.color }}>
+                {selectedAgent.name} — {selectedAgent.role}
+              </div>
+              <div className="font-pixel text-[8px] text-gray-400 mt-1">
+                {statusLabel(selectedAgent.status)} • {selectedAgent.model}
+              </div>
+              {selectedAgent.currentTask && (
+                <div className="font-pixel text-[7px] text-gray-500 mt-1">
+                  📋 {selectedAgent.currentTask}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

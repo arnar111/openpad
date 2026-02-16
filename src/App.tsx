@@ -46,7 +46,7 @@ export default function App() {
             </button>
           ))}
         </nav>
-        <div className="font-pixel text-[7px] text-gray-600">v1.0</div>
+        <div className="font-pixel text-[8px] text-gray-600">v1.1</div>
       </header>
 
       {/* Content */}

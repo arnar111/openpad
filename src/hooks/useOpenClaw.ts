@@ -32,6 +32,8 @@ export interface LiveAgent extends Agent {
 const AGENT_ID_MAP: Record<string, string> = {
   main: 'blaer',
   regn: 'regn',
+  dogg: 'dogg',
+  udi: 'udi',
 }
 
 function inferAgentFromSession(session: SessionData): string | null {
@@ -109,7 +111,7 @@ export function useLiveAgents(): { agents: LiveAgent[]; connected: boolean } {
     if (liveStatus === 'offline') {
       const isConfigured = openclawId 
         ? status.agents?.list?.some((a: { id: string }) => a.id === openclawId)
-        : ['frost', 'ylur', 'stormur'].includes(agent.id) // team members always configured
+        : ['frost', 'ylur', 'stormur', 'dogg', 'udi'].includes(agent.id) // team members always configured
       if (isConfigured) liveStatus = 'idle'
     }
 

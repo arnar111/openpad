@@ -9,26 +9,27 @@ interface NodePos {
 }
 
 function buildTree(): NodePos {
-  const arnar = agents.find((a) => a.id === 'arnar')!
-  const blaer = agents.find((a) => a.id === 'blaer')!
-  const frost = agents.find((a) => a.id === 'frost')!
-  const regn = agents.find((a) => a.id === 'regn')!
-  const ylur = agents.find((a) => a.id === 'ylur')!
-  const stormur = agents.find((a) => a.id === 'stormur')!
+  const find = (id: string) => agents.find((a) => a.id === id)!
 
   return {
-    agent: arnar, x: 0.5, y: 0.08,
+    agent: find('arnar'), x: 0.5, y: 0.08,
     children: [{
-      agent: blaer, x: 0.5, y: 0.30,
+      agent: find('blaer'), x: 0.5, y: 0.28,
       children: [
         {
-          agent: frost, x: 0.65, y: 0.52,
+          agent: find('frost'), x: 0.72, y: 0.48,
           children: [
-            { agent: ylur, x: 0.55, y: 0.76, children: [] },
-            { agent: stormur, x: 0.75, y: 0.76, children: [] },
+            { agent: find('ylur'), x: 0.62, y: 0.72, children: [] },
+            { agent: find('stormur'), x: 0.82, y: 0.72, children: [] },
           ],
         },
-        { agent: regn, x: 0.30, y: 0.52, children: [] },
+        {
+          agent: find('regn'), x: 0.28, y: 0.48,
+          children: [
+            { agent: find('dogg'), x: 0.18, y: 0.72, children: [] },
+            { agent: find('udi'), x: 0.38, y: 0.72, children: [] },
+          ],
+        },
       ],
     }],
   }
