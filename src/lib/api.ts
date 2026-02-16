@@ -1,7 +1,7 @@
 // OpenPad API layer
-// Since OpenClaw gateway doesn't expose a REST API, we use a data bridge:
-// A background script writes status to /public/data/status.json every 30s
-// OpenPad polls this file for live data.
+//
+// Previously: polled /public/data/status.json written by a bridge script.
+// Now: subscribes to Firebase Realtime Database at /openpad/status.
 
 export interface SessionData {
   agentId: string
@@ -81,64 +81,117 @@ export interface OpenClawStatus {
 }
 
 import snapshot from '../data/status-snapshot.json'
-
-const DATA_URL = '/data/status.json'
-const POLL_INTERVAL = 15000
+import { onValue, off, ref, type DatabaseReference, type Unsubscribe } from 'firebase/database'
+import { rtdb } from './firebase'
 
 type Listener = (data: OpenClawStatus, live: boolean) => void
+
+function computeLive(data: OpenClawStatus, connected: boolean): boolean {
+  if (!connected) return false
+  const age = Date.now() - (data.timestamp || 0)
+  return age < 60000
+}
 
 class OpenPadAPI {
   private listeners: Set<Listener> = new Set()
   private data: OpenClawStatus
   private live = false
-  private polling = false
-  private timer: ReturnType<typeof setInterval> | null = null
+
+  private started = false
+  private connected = false
+
+  private statusRef: DatabaseReference | null = null
+  private connectedRef: DatabaseReference | null = null
+  private statusUnsub: Unsubscribe | null = null
+  private connectedUnsub: Unsubscribe | null = null
 
   constructor() {
-    // Start with baked-in snapshot so Netlify always has data
+    // Start with baked-in snapshot so static hosting always has data.
     this.data = snapshot as unknown as OpenClawStatus
   }
 
   subscribe(fn: Listener): () => void {
     this.listeners.add(fn)
     fn(this.data, this.live)
-    if (!this.polling) this.startPolling()
+    if (!this.started) this.start()
+
     return () => {
       this.listeners.delete(fn)
-      if (this.listeners.size === 0) this.stopPolling()
+      if (this.listeners.size === 0) this.stop()
     }
   }
 
-  private startPolling() {
-    this.polling = true
-    this.poll()
-    this.timer = setInterval(() => this.poll(), POLL_INTERVAL)
-  }
+  private start() {
+    this.started = true
 
-  private stopPolling() {
-    this.polling = false
-    if (this.timer) {
-      clearInterval(this.timer)
-      this.timer = null
-    }
-  }
-
-  private async poll() {
+    // If Firebase is misconfigured or blocked, keep snapshot and mark as not live.
     try {
-      const res = await fetch(DATA_URL + '?t=' + Date.now())
-      if (res.ok) {
-        const data = await res.json()
-        // Only count as live if data is less than 60s old
-        const age = Date.now() - (data.timestamp || 0)
-        this.live = age < 60000
-        this.data = data
-        this.listeners.forEach(fn => fn(data, this.live))
-      }
+      this.statusRef = ref(rtdb, '/openpad/status')
+      this.connectedRef = ref(rtdb, '.info/connected')
+
+      this.connectedUnsub = onValue(
+        this.connectedRef,
+        snap => {
+          this.connected = Boolean(snap.val())
+          this.live = computeLive(this.data, this.connected)
+          this.emit()
+        },
+        () => {
+          // Permission/network error
+          this.connected = false
+          this.live = false
+          this.emit()
+        },
+      )
+
+      this.statusUnsub = onValue(
+        this.statusRef,
+        snap => {
+          const val = snap.val()
+          if (val && typeof val === 'object') {
+            const next = val as OpenClawStatus
+            this.data = next
+            this.live = computeLive(next, this.connected)
+            this.emit()
+          }
+        },
+        () => {
+          // Permission/network error
+          this.connected = false
+          this.live = false
+          this.emit()
+        },
+      )
     } catch {
-      // Bridge not available (e.g. Netlify) — keep using snapshot
+      this.connected = false
       this.live = false
-      this.listeners.forEach(fn => fn(this.data, false))
+      this.emit()
     }
+  }
+
+  private stop() {
+    this.started = false
+
+    // Best-effort cleanup (also fine if Firebase was never initialized).
+    try {
+      if (this.statusUnsub) this.statusUnsub()
+      if (this.connectedUnsub) this.connectedUnsub()
+      if (this.statusRef) off(this.statusRef)
+      if (this.connectedRef) off(this.connectedRef)
+    } catch {
+      // ignore
+    }
+
+    this.statusUnsub = null
+    this.connectedUnsub = null
+    this.statusRef = null
+    this.connectedRef = null
+    this.connected = false
+    this.live = false
+  }
+
+  private emit() {
+    this.listeners.forEach(fn => fn(this.data, this.live))
   }
 
   getLatest(): OpenClawStatus {
