@@ -3,15 +3,17 @@ import OfficeView from './components/Office/OfficeView'
 import OrgChart from './components/OrgChart/OrgChart'
 import Dashboard from './components/Dashboard/Dashboard'
 import ChatRoom from './components/Chat/ChatRoom'
+import Settings from './components/Settings/Settings'
 import PinLock, { useAuth } from './components/PinLock/PinLock'
 
-type Tab = 'office' | 'org' | 'dashboard' | 'chat'
+type Tab = 'office' | 'org' | 'dashboard' | 'chat' | 'settings'
 
 const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: 'office', label: 'Office', icon: '🏢' },
   { id: 'chat', label: 'Samtöl', icon: '💬' },
   { id: 'org', label: 'Org Chart', icon: '📊' },
   { id: 'dashboard', label: 'Dashboard', icon: '📈' },
+  { id: 'settings', label: 'Settings', icon: '⚙️' },
 ]
 
 export default function App() {
@@ -55,6 +57,7 @@ export default function App() {
         {activeTab === 'chat' && <ChatRoom />}
         {activeTab === 'org' && <OrgChart />}
         {activeTab === 'dashboard' && <Dashboard />}
+        {activeTab === 'settings' && <Settings />}
       </main>
     </div>
   )

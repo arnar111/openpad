@@ -58,14 +58,30 @@ export function useLiveAgents(): { agents: LiveAgent[]; connected: boolean } {
   const { status, connected } = useOpenClawStatus()
 
   const liveAgents: LiveAgent[] = agents.map((agent) => {
-    if (!status || agent.isHuman) {
+    if (!status) {
       return {
         ...agent,
+        currentTask: 'Waiting for data...',
         sessions: [],
         totalTokensToday: 0,
         lastActive: null,
         activeSessions: 0,
         primaryModel: agent.model,
+      }
+    }
+
+    if (agent.isHuman) {
+      // Count active conversations for human
+      const recentCount = status.sessions.recent.filter(s => s.age < 600000).length
+      return {
+        ...agent,
+        currentTask: recentCount > 0 ? `${recentCount} active conversations` : 'Away',
+        sessions: [],
+        totalTokensToday: 0,
+        lastActive: recentCount > 0 ? Date.now() : null,
+        activeSessions: recentCount,
+        primaryModel: agent.model,
+        status: recentCount > 0 ? 'active' as const : 'offline' as const,
       }
     }
 

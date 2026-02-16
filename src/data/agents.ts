@@ -21,7 +21,7 @@ export const agents: Agent[] = [
     model: 'human',
     isHuman: true,
     status: 'active',
-    currentTask: 'Strategic planning',
+    currentTask: '—',
   },
   {
     id: 'blaer',
@@ -31,7 +31,7 @@ export const agents: Agent[] = [
     color: '#7B68EE',
     model: 'claude-opus-4-6',
     status: 'active',
-    currentTask: 'Coordinating agents',
+    currentTask: '—',
     reportsTo: 'arnar',
   },
   {
@@ -42,7 +42,7 @@ export const agents: Agent[] = [
     color: '#00BFFF',
     model: 'discord-bot',
     status: 'active',
-    currentTask: 'Code review',
+    currentTask: '—',
     reportsTo: 'blaer',
   },
   {
@@ -53,7 +53,7 @@ export const agents: Agent[] = [
     color: '#4682B4',
     model: 'gemini-3-flash',
     status: 'idle',
-    currentTask: 'Analyzing data',
+    currentTask: '—',
     reportsTo: 'blaer',
   },
   {
@@ -64,7 +64,7 @@ export const agents: Agent[] = [
     color: '#FF6347',
     model: 'claude-sonnet',
     status: 'active',
-    currentTask: 'Building components',
+    currentTask: '—',
     reportsTo: 'frost',
   },
   {
@@ -75,7 +75,7 @@ export const agents: Agent[] = [
     color: '#9370DB',
     model: 'gemini-3-flash',
     status: 'idle',
-    currentTask: 'Designing layouts',
+    currentTask: '—',
     reportsTo: 'frost',
   },
   {
@@ -86,7 +86,7 @@ export const agents: Agent[] = [
     color: '#20B2AA',
     model: 'gemini-3-flash',
     status: 'idle',
-    currentTask: 'Writing content',
+    currentTask: '—',
     reportsTo: 'regn',
   },
   {
@@ -97,7 +97,7 @@ export const agents: Agent[] = [
     color: '#DAA520',
     model: 'gemini-3-flash',
     status: 'idle',
-    currentTask: 'Analyzing data',
+    currentTask: '—',
     reportsTo: 'regn',
   },
 ]

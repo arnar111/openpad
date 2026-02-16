@@ -1,5 +1,5 @@
 {
-  "timestamp": 1771259014781,
+  "timestamp": 1771261669862,
   "os": {
     "platform": "linux",
     "arch": "x64",
@@ -12,7 +12,7 @@
     "urlSource": "local loopback",
     "misconfigured": false,
     "reachable": true,
-    "connectLatencyMs": 25,
+    "connectLatencyMs": 23,
     "self": {
       "host": "DESKTOP-1IPMTLB",
       "ip": "172.28.160.83",
@@ -30,9 +30,9 @@
         "workspaceDir": "/home/arnar111/.openclaw/workspace",
         "bootstrapPending": true,
         "sessionsPath": "/home/arnar111/.openclaw/agents/main/sessions/sessions.json",
-        "sessionsCount": 129,
-        "lastUpdatedAt": 1771258837801,
-        "lastActiveAgeMs": 176693
+        "sessionsCount": 132,
+        "lastUpdatedAt": 1771261590115,
+        "lastActiveAgeMs": 79470
       },
       {
         "id": "dogg",
@@ -52,7 +52,7 @@
         "sessionsPath": "/home/arnar111/.openclaw/agents/frost/sessions/sessions.json",
         "sessionsCount": 1,
         "lastUpdatedAt": 1771255579363,
-        "lastActiveAgeMs": 3435131
+        "lastActiveAgeMs": 6090222
       },
       {
         "id": "mufc",
@@ -62,7 +62,7 @@
         "sessionsPath": "/home/arnar111/.openclaw/agents/mufc/sessions/sessions.json",
         "sessionsCount": 2,
         "lastUpdatedAt": 1770751012346,
-        "lastActiveAgeMs": 508002148
+        "lastActiveAgeMs": 510657239
       },
       {
         "id": "regn",
@@ -72,7 +72,7 @@
         "sessionsPath": "/home/arnar111/.openclaw/agents/regn/sessions/sessions.json",
         "sessionsCount": 1,
         "lastUpdatedAt": 1771257761250,
-        "lastActiveAgeMs": 1253244
+        "lastActiveAgeMs": 3908335
       },
       {
         "id": "stormur",
@@ -82,7 +82,7 @@
         "sessionsPath": "/home/arnar111/.openclaw/agents/stormur/sessions/sessions.json",
         "sessionsCount": 1,
         "lastUpdatedAt": 1771257781331,
-        "lastActiveAgeMs": 1233163
+        "lastActiveAgeMs": 3888254
       },
       {
         "id": "udi",
@@ -102,10 +102,10 @@
         "sessionsPath": "/home/arnar111/.openclaw/agents/ylur/sessions/sessions.json",
         "sessionsCount": 1,
         "lastUpdatedAt": 1771257773127,
-        "lastActiveAgeMs": 1241367
+        "lastActiveAgeMs": 3896458
       }
     ],
-    "totalSessions": 135,
+    "totalSessions": 138,
     "bootstrapPendingCount": 1
   },
   "sessions": {
@@ -119,7 +119,7 @@
       "/home/arnar111/.openclaw/agents/udi/sessions/sessions.json",
       "/home/arnar111/.openclaw/agents/ylur/sessions/sessions.json"
     ],
-    "count": 135,
+    "count": 138,
     "defaults": {
       "model": "claude-opus-4-6",
       "contextTokens": 200000
@@ -127,18 +127,80 @@
     "recent": [
       {
         "agentId": "main",
-        "key": "agent:main:discord:channel:1471287901986885654",
+        "key": "agent:main:subagent:e95f0e38-71b7-48d6-8c0c-fc4a023e1a49",
+        "kind": "direct",
+        "sessionId": "c15442d1-18b6-48d4-be27-506ebb6571cd",
+        "updatedAt": 1771261590115,
+        "age": 79574,
+        "abortedLastRun": false,
+        "inputTokens": 28533,
+        "outputTokens": 10066,
+        "totalTokens": 25678,
+        "remainingTokens": 374322,
+        "percentUsed": 6,
+        "model": "gpt-5.2",
+        "contextTokens": 400000,
+        "flags": [
+          "id:c15442d1-18b6-48d4-be27-506ebb6571cd"
+        ],
+        "displayName": "Direct session"
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:discord:channel:1472223401979412532",
         "kind": "group",
-        "sessionId": "0626059e-941d-4ff0-a92c-509116c8b7fe",
-        "updatedAt": 1771258837801,
-        "age": 176801,
+        "sessionId": "31618620-e6da-48a7-8888-40790c3d369c",
+        "updatedAt": 1771261589368,
+        "age": 80321,
         "systemSent": true,
         "abortedLastRun": false,
         "inputTokens": 3,
-        "outputTokens": 9,
-        "totalTokens": 174223,
-        "remainingTokens": 25777,
-        "percentUsed": 87,
+        "outputTokens": 70,
+        "totalTokens": 108769,
+        "remainingTokens": 91231,
+        "percentUsed": 54,
+        "model": "claude-opus-4-6",
+        "contextTokens": 200000,
+        "flags": [
+          "system",
+          "id:31618620-e6da-48a7-8888-40790c3d369c"
+        ],
+        "displayName": "#devchannel"
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:subagent:86651a9c-b7f5-4b19-8ab1-de96265d9340",
+        "kind": "direct",
+        "sessionId": "f067f110-c07a-4c8f-a1ca-17acbccafa3c",
+        "updatedAt": 1771261559560,
+        "age": 110129,
+        "abortedLastRun": false,
+        "inputTokens": 55857,
+        "outputTokens": 5556,
+        "totalTokens": 24044,
+        "remainingTokens": 375956,
+        "percentUsed": 6,
+        "model": "gpt-5.2",
+        "contextTokens": 400000,
+        "flags": [
+          "id:f067f110-c07a-4c8f-a1ca-17acbccafa3c"
+        ],
+        "displayName": "Direct session"
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:discord:channel:1471287901986885654",
+        "kind": "group",
+        "sessionId": "0626059e-941d-4ff0-a92c-509116c8b7fe",
+        "updatedAt": 1771261551555,
+        "age": 118134,
+        "systemSent": true,
+        "abortedLastRun": false,
+        "inputTokens": 3,
+        "outputTokens": 8,
+        "totalTokens": 30578,
+        "remainingTokens": 169422,
+        "percentUsed": 15,
         "model": "claude-opus-4-6",
         "contextTokens": 200000,
         "flags": [
@@ -149,18 +211,35 @@
       },
       {
         "agentId": "main",
+        "key": "agent:main:subagent:34ba0b2e-22dd-4214-8745-2a56d33bc24d",
+        "kind": "direct",
+        "sessionId": "80e7463c-91c0-4bae-a9d1-c7456baec97b",
+        "updatedAt": 1771261426849,
+        "age": 242840,
+        "totalTokens": 0,
+        "remainingTokens": 200000,
+        "percentUsed": 0,
+        "model": "claude-opus-4-6",
+        "contextTokens": 200000,
+        "flags": [
+          "id:80e7463c-91c0-4bae-a9d1-c7456baec97b"
+        ],
+        "displayName": "Direct session"
+      },
+      {
+        "agentId": "main",
         "key": "agent:main:main",
         "kind": "direct",
         "sessionId": "a7ed0af7-0452-4693-968b-e7a89b3f3c52",
-        "updatedAt": 1771258736627,
-        "age": 277975,
+        "updatedAt": 1771261284711,
+        "age": 384978,
         "systemSent": true,
         "abortedLastRun": false,
-        "inputTokens": 297700,
-        "outputTokens": 136,
-        "totalTokens": 295889,
-        "remainingTokens": 752687,
-        "percentUsed": 28,
+        "inputTokens": 156212,
+        "outputTokens": 138,
+        "totalTokens": 310690,
+        "remainingTokens": 737886,
+        "percentUsed": 30,
         "model": "gemini-3-flash-preview",
         "contextTokens": 1048576,
         "flags": [
@@ -171,293 +250,108 @@
       },
       {
         "agentId": "main",
-        "key": "agent:main:subagent:37e4bb69-8400-42d3-bbd4-98049a9dcb0f",
-        "kind": "direct",
-        "sessionId": "1567b045-0c3f-4f1d-a592-e712d8dd084c",
-        "updatedAt": 1771258603032,
-        "age": 411570,
-        "abortedLastRun": false,
+        "key": "agent:main:discord:channel:1470840851289608376",
+        "kind": "group",
+        "sessionId": "fb285237-e93d-4632-b305-ca3b1a679751",
+        "updatedAt": 1771261222723,
+        "age": 446966,
         "totalTokens": 0,
         "remainingTokens": 200000,
         "percentUsed": 0,
-        "model": "kimi-latest",
+        "model": "claude-opus-4-6",
         "contextTokens": 200000,
         "flags": [
-          "id:1567b045-0c3f-4f1d-a592-e712d8dd084c"
+          "id:fb285237-e93d-4632-b305-ca3b1a679751"
         ],
         "displayName": "Direct session"
       },
       {
         "agentId": "main",
-        "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a",
+        "key": "agent:main:cron:c517159c-8d7f-44d5-8511-4f017480b6dd",
         "kind": "direct",
-        "sessionId": "05b03be4-f7d1-426d-8f09-608ad79a796f",
-        "updatedAt": 1771258097911,
-        "age": 916691,
+        "sessionId": "c2d9e3fd-4fa5-46cd-8acf-b80275fb584d",
+        "updatedAt": 1771261216928,
+        "age": 452761,
         "systemSent": true,
-        "inputTokens": 15747,
-        "outputTokens": 545,
-        "totalTokens": 15902,
-        "remainingTokens": 384098,
+        "inputTokens": 83720,
+        "outputTokens": 712,
+        "totalTokens": 38267,
+        "remainingTokens": 1010309,
+        "percentUsed": 4,
+        "model": "gemini-3-flash-preview",
+        "contextTokens": 1048576,
+        "flags": [
+          "system",
+          "id:c2d9e3fd-4fa5-46cd-8acf-b80275fb584d"
+        ],
+        "displayName": "MUFC News"
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:cron:c517159c-8d7f-44d5-8511-4f017480b6dd:run:c2d9e3fd-4fa5-46cd-8acf-b80275fb584d",
+        "kind": "direct",
+        "sessionId": "c2d9e3fd-4fa5-46cd-8acf-b80275fb584d",
+        "updatedAt": 1771261216928,
+        "age": 452761,
+        "systemSent": true,
+        "inputTokens": 83720,
+        "outputTokens": 712,
+        "totalTokens": 38267,
+        "remainingTokens": 1010309,
+        "percentUsed": 4,
+        "model": "gemini-3-flash-preview",
+        "contextTokens": 1048576,
+        "flags": [
+          "system",
+          "id:c2d9e3fd-4fa5-46cd-8acf-b80275fb584d"
+        ],
+        "displayName": "MUFC News"
+      },
+      {
+        "agentId": "main",
+        "key": "agent:main:cron:2ea4d6e9-a870-4c04-b453-41c7646e235a",
+        "kind": "direct",
+        "sessionId": "833552bc-f955-43be-b37b-aeb8da8cbf82",
+        "updatedAt": 1771261200040,
+        "age": 469649,
+        "systemSent": true,
+        "inputTokens": 15565,
+        "outputTokens": 470,
+        "totalTokens": 15565,
+        "remainingTokens": 384435,
         "percentUsed": 4,
         "model": "gpt-5-nano",
         "contextTokens": 400000,
         "flags": [
           "system",
-          "id:05b03be4-f7d1-426d-8f09-608ad79a796f"
+          "id:833552bc-f955-43be-b37b-aeb8da8cbf82"
         ],
-        "displayName": "Email check"
-      },
-      {
-        "agentId": "main",
-        "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a:run:05b03be4-f7d1-426d-8f09-608ad79a796f",
-        "kind": "direct",
-        "sessionId": "05b03be4-f7d1-426d-8f09-608ad79a796f",
-        "updatedAt": 1771258097911,
-        "age": 916691,
-        "systemSent": true,
-        "inputTokens": 15747,
-        "outputTokens": 545,
-        "totalTokens": 15902,
-        "remainingTokens": 384098,
-        "percentUsed": 4,
-        "model": "gpt-5-nano",
-        "contextTokens": 400000,
-        "flags": [
-          "system",
-          "id:05b03be4-f7d1-426d-8f09-608ad79a796f"
-        ],
-        "displayName": "Email check"
-      },
-      {
-        "agentId": "main",
-        "key": "agent:main:cron:81cbe8fa-0f01-452f-9bf2-444a642f43de",
-        "kind": "direct",
-        "sessionId": "6c182eeb-a56f-42b0-851d-4ac87f9924c5",
-        "updatedAt": 1771257801420,
-        "age": 1213182,
-        "systemSent": true,
-        "abortedLastRun": false,
-        "inputTokens": 3,
-        "outputTokens": 8,
-        "totalTokens": 40862,
-        "remainingTokens": 159138,
-        "percentUsed": 20,
-        "model": "claude-opus-4-6",
-        "contextTokens": 200000,
-        "flags": [
-          "system",
-          "id:6c182eeb-a56f-42b0-851d-4ac87f9924c5"
-        ],
-        "displayName": "Team sync"
-      },
-      {
-        "agentId": "stormur",
-        "key": "agent:stormur:main",
-        "kind": "direct",
-        "sessionId": "5662e8cc-3dfc-4d89-9dd1-57af2478e841",
-        "updatedAt": 1771257781331,
-        "age": 1233271,
-        "abortedLastRun": false,
-        "inputTokens": 43666,
-        "outputTokens": 444,
-        "totalTokens": 43666,
-        "remainingTokens": 1004910,
-        "percentUsed": 4,
-        "model": "gemini-3-flash-preview",
-        "contextTokens": 1048576,
-        "flags": [
-          "id:5662e8cc-3dfc-4d89-9dd1-57af2478e841"
-        ],
-        "displayName": "Direct session"
-      },
-      {
-        "agentId": "ylur",
-        "key": "agent:ylur:main",
-        "kind": "direct",
-        "sessionId": "35efacb7-50c5-4316-be4d-4cc0822315ac",
-        "updatedAt": 1771257773127,
-        "age": 1241475,
-        "abortedLastRun": false,
-        "inputTokens": 35968,
-        "outputTokens": 323,
-        "totalTokens": 35968,
-        "remainingTokens": 1012608,
-        "percentUsed": 3,
-        "model": "gemini-3-flash-preview",
-        "contextTokens": 1048576,
-        "flags": [
-          "id:35efacb7-50c5-4316-be4d-4cc0822315ac"
-        ],
-        "displayName": "Direct session"
-      },
-      {
-        "agentId": "main",
-        "key": "agent:main:discord:channel:1472223401979412532",
-        "kind": "group",
-        "sessionId": "31618620-e6da-48a7-8888-40790c3d369c",
-        "updatedAt": 1771257761675,
-        "age": 1252927,
-        "systemSent": true,
-        "abortedLastRun": false,
-        "inputTokens": 3,
-        "outputTokens": 7,
-        "totalTokens": 98238,
-        "remainingTokens": 101762,
-        "percentUsed": 49,
-        "model": "claude-opus-4-6",
-        "contextTokens": 200000,
-        "flags": [
-          "system",
-          "id:31618620-e6da-48a7-8888-40790c3d369c"
-        ],
-        "displayName": "#devchannel"
-      },
-      {
-        "agentId": "regn",
-        "key": "agent:regn:main",
-        "kind": "direct",
-        "sessionId": "56558044-d2f4-443f-a1f5-8482f58e31dc",
-        "updatedAt": 1771257761250,
-        "age": 1253352,
-        "abortedLastRun": false,
-        "inputTokens": 80757,
-        "outputTokens": 654,
-        "totalTokens": 80757,
-        "remainingTokens": 967819,
-        "percentUsed": 8,
-        "model": "gemini-3-flash-preview",
-        "contextTokens": 1048576,
-        "flags": [
-          "id:56558044-d2f4-443f-a1f5-8482f58e31dc"
-        ],
-        "displayName": "Direct session"
+        "displayName": "Back reset reminder"
       }
     ],
     "byAgent": [
       {
         "agentId": "main",
         "path": "/home/arnar111/.openclaw/agents/main/sessions/sessions.json",
-        "count": 129,
+        "count": 132,
         "recent": [
           {
             "agentId": "main",
-            "key": "agent:main:discord:channel:1471287901986885654",
-            "kind": "group",
-            "sessionId": "0626059e-941d-4ff0-a92c-509116c8b7fe",
-            "updatedAt": 1771258837801,
-            "age": 176801,
-            "systemSent": true,
-            "abortedLastRun": false,
-            "inputTokens": 3,
-            "outputTokens": 9,
-            "totalTokens": 174223,
-            "remainingTokens": 25777,
-            "percentUsed": 87,
-            "model": "claude-opus-4-6",
-            "contextTokens": 200000,
-            "flags": [
-              "system",
-              "id:0626059e-941d-4ff0-a92c-509116c8b7fe"
-            ]
-          },
-          {
-            "agentId": "main",
-            "key": "agent:main:main",
+            "key": "agent:main:subagent:e95f0e38-71b7-48d6-8c0c-fc4a023e1a49",
             "kind": "direct",
-            "sessionId": "a7ed0af7-0452-4693-968b-e7a89b3f3c52",
-            "updatedAt": 1771258736627,
-            "age": 277975,
-            "systemSent": true,
+            "sessionId": "c15442d1-18b6-48d4-be27-506ebb6571cd",
+            "updatedAt": 1771261590115,
+            "age": 79574,
             "abortedLastRun": false,
-            "inputTokens": 297700,
-            "outputTokens": 136,
-            "totalTokens": 295889,
-            "remainingTokens": 752687,
-            "percentUsed": 28,
-            "model": "gemini-3-flash-preview",
-            "contextTokens": 1048576,
-            "flags": [
-              "system",
-              "id:a7ed0af7-0452-4693-968b-e7a89b3f3c52"
-            ]
-          },
-          {
-            "agentId": "main",
-            "key": "agent:main:subagent:37e4bb69-8400-42d3-bbd4-98049a9dcb0f",
-            "kind": "direct",
-            "sessionId": "1567b045-0c3f-4f1d-a592-e712d8dd084c",
-            "updatedAt": 1771258603032,
-            "age": 411570,
-            "abortedLastRun": false,
-            "totalTokens": 0,
-            "remainingTokens": 200000,
-            "percentUsed": 0,
-            "model": "kimi-latest",
-            "contextTokens": 200000,
-            "flags": [
-              "id:1567b045-0c3f-4f1d-a592-e712d8dd084c"
-            ]
-          },
-          {
-            "agentId": "main",
-            "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a",
-            "kind": "direct",
-            "sessionId": "05b03be4-f7d1-426d-8f09-608ad79a796f",
-            "updatedAt": 1771258097911,
-            "age": 916691,
-            "systemSent": true,
-            "inputTokens": 15747,
-            "outputTokens": 545,
-            "totalTokens": 15902,
-            "remainingTokens": 384098,
-            "percentUsed": 4,
-            "model": "gpt-5-nano",
+            "inputTokens": 28533,
+            "outputTokens": 10066,
+            "totalTokens": 25678,
+            "remainingTokens": 374322,
+            "percentUsed": 6,
+            "model": "gpt-5.2",
             "contextTokens": 400000,
             "flags": [
-              "system",
-              "id:05b03be4-f7d1-426d-8f09-608ad79a796f"
-            ]
-          },
-          {
-            "agentId": "main",
-            "key": "agent:main:cron:788c5c26-f88a-49b6-b744-aa2920a8da7a:run:05b03be4-f7d1-426d-8f09-608ad79a796f",
-            "kind": "direct",
-            "sessionId": "05b03be4-f7d1-426d-8f09-608ad79a796f",
-            "updatedAt": 1771258097911,
-            "age": 916691,
-            "systemSent": true,
-            "inputTokens": 15747,
-            "outputTokens": 545,
-            "totalTokens": 15902,
-            "remainingTokens": 384098,
-            "percentUsed": 4,
-            "model": "gpt-5-nano",
-            "contextTokens": 400000,
-            "flags": [
-              "system",
-              "id:05b03be4-f7d1-426d-8f09-608ad79a796f"
-            ]
-          },
-          {
-            "agentId": "main",
-            "key": "agent:main:cron:81cbe8fa-0f01-452f-9bf2-444a642f43de",
-            "kind": "direct",
-            "sessionId": "6c182eeb-a56f-42b0-851d-4ac87f9924c5",
-            "updatedAt": 1771257801420,
-            "age": 1213182,
-            "systemSent": true,
-            "abortedLastRun": false,
-            "inputTokens": 3,
-            "outputTokens": 8,
-            "totalTokens": 40862,
-            "remainingTokens": 159138,
-            "percentUsed": 20,
-            "model": "claude-opus-4-6",
-            "contextTokens": 200000,
-            "flags": [
-              "system",
-              "id:6c182eeb-a56f-42b0-851d-4ac87f9924c5"
+              "id:c15442d1-18b6-48d4-be27-506ebb6571cd"
             ]
           },
           {
@@ -465,15 +359,15 @@
             "key": "agent:main:discord:channel:1472223401979412532",
             "kind": "group",
             "sessionId": "31618620-e6da-48a7-8888-40790c3d369c",
-            "updatedAt": 1771257761675,
-            "age": 1252927,
+            "updatedAt": 1771261589368,
+            "age": 80321,
             "systemSent": true,
             "abortedLastRun": false,
             "inputTokens": 3,
-            "outputTokens": 7,
-            "totalTokens": 98238,
-            "remainingTokens": 101762,
-            "percentUsed": 49,
+            "outputTokens": 70,
+            "totalTokens": 108769,
+            "remainingTokens": 91231,
+            "percentUsed": 54,
             "model": "claude-opus-4-6",
             "contextTokens": 200000,
             "flags": [
@@ -483,63 +377,155 @@
           },
           {
             "agentId": "main",
-            "key": "agent:main:cron:0d79c133-a13e-4c01-9592-5947c177d26a",
+            "key": "agent:main:subagent:86651a9c-b7f5-4b19-8ab1-de96265d9340",
             "kind": "direct",
-            "sessionId": "2690bf7d-1bb1-47a9-8bf7-5636c632af01",
-            "updatedAt": 1771257753445,
-            "age": 1261157,
+            "sessionId": "f067f110-c07a-4c8f-a1ca-17acbccafa3c",
+            "updatedAt": 1771261559560,
+            "age": 110129,
+            "abortedLastRun": false,
+            "inputTokens": 55857,
+            "outputTokens": 5556,
+            "totalTokens": 24044,
+            "remainingTokens": 375956,
+            "percentUsed": 6,
+            "model": "gpt-5.2",
+            "contextTokens": 400000,
+            "flags": [
+              "id:f067f110-c07a-4c8f-a1ca-17acbccafa3c"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:discord:channel:1471287901986885654",
+            "kind": "group",
+            "sessionId": "0626059e-941d-4ff0-a92c-509116c8b7fe",
+            "updatedAt": 1771261551555,
+            "age": 118134,
             "systemSent": true,
             "abortedLastRun": false,
             "inputTokens": 3,
-            "outputTokens": 161,
-            "totalTokens": 24138,
-            "remainingTokens": 175862,
-            "percentUsed": 12,
+            "outputTokens": 8,
+            "totalTokens": 30578,
+            "remainingTokens": 169422,
+            "percentUsed": 15,
             "model": "claude-opus-4-6",
             "contextTokens": 200000,
             "flags": [
               "system",
-              "id:2690bf7d-1bb1-47a9-8bf7-5636c632af01"
+              "id:0626059e-941d-4ff0-a92c-509116c8b7fe"
             ]
           },
           {
             "agentId": "main",
-            "key": "agent:main:cron:81cbe8fa-0f01-452f-9bf2-444a642f43de:run:6c182eeb-a56f-42b0-851d-4ac87f9924c5",
+            "key": "agent:main:subagent:34ba0b2e-22dd-4214-8745-2a56d33bc24d",
             "kind": "direct",
-            "sessionId": "6c182eeb-a56f-42b0-851d-4ac87f9924c5",
-            "updatedAt": 1771257604743,
-            "age": 1409859,
-            "systemSent": true,
-            "inputTokens": 481838,
-            "outputTokens": 3352,
-            "totalTokens": 65626,
-            "remainingTokens": 982950,
-            "percentUsed": 6,
-            "model": "gemini-3-flash-preview",
-            "contextTokens": 1048576,
+            "sessionId": "80e7463c-91c0-4bae-a9d1-c7456baec97b",
+            "updatedAt": 1771261426849,
+            "age": 242840,
+            "totalTokens": 0,
+            "remainingTokens": 200000,
+            "percentUsed": 0,
+            "model": "claude-opus-4-6",
+            "contextTokens": 200000,
             "flags": [
-              "system",
-              "id:6c182eeb-a56f-42b0-851d-4ac87f9924c5"
+              "id:80e7463c-91c0-4bae-a9d1-c7456baec97b"
             ]
           },
           {
             "agentId": "main",
-            "key": "agent:main:cron:0d79c133-a13e-4c01-9592-5947c177d26a:run:2690bf7d-1bb1-47a9-8bf7-5636c632af01",
+            "key": "agent:main:main",
             "kind": "direct",
-            "sessionId": "2690bf7d-1bb1-47a9-8bf7-5636c632af01",
-            "updatedAt": 1771257600026,
-            "age": 1414576,
+            "sessionId": "a7ed0af7-0452-4693-968b-e7a89b3f3c52",
+            "updatedAt": 1771261284711,
+            "age": 384978,
             "systemSent": true,
-            "inputTokens": 38430,
-            "outputTokens": 179,
-            "totalTokens": 35640,
-            "remainingTokens": 1012936,
-            "percentUsed": 3,
+            "abortedLastRun": false,
+            "inputTokens": 156212,
+            "outputTokens": 138,
+            "totalTokens": 310690,
+            "remainingTokens": 737886,
+            "percentUsed": 30,
             "model": "gemini-3-flash-preview",
             "contextTokens": 1048576,
             "flags": [
               "system",
-              "id:2690bf7d-1bb1-47a9-8bf7-5636c632af01"
+              "id:a7ed0af7-0452-4693-968b-e7a89b3f3c52"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:discord:channel:1470840851289608376",
+            "kind": "group",
+            "sessionId": "fb285237-e93d-4632-b305-ca3b1a679751",
+            "updatedAt": 1771261222723,
+            "age": 446966,
+            "totalTokens": 0,
+            "remainingTokens": 200000,
+            "percentUsed": 0,
+            "model": "claude-opus-4-6",
+            "contextTokens": 200000,
+            "flags": [
+              "id:fb285237-e93d-4632-b305-ca3b1a679751"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:cron:c517159c-8d7f-44d5-8511-4f017480b6dd",
+            "kind": "direct",
+            "sessionId": "c2d9e3fd-4fa5-46cd-8acf-b80275fb584d",
+            "updatedAt": 1771261216928,
+            "age": 452761,
+            "systemSent": true,
+            "inputTokens": 83720,
+            "outputTokens": 712,
+            "totalTokens": 38267,
+            "remainingTokens": 1010309,
+            "percentUsed": 4,
+            "model": "gemini-3-flash-preview",
+            "contextTokens": 1048576,
+            "flags": [
+              "system",
+              "id:c2d9e3fd-4fa5-46cd-8acf-b80275fb584d"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:cron:c517159c-8d7f-44d5-8511-4f017480b6dd:run:c2d9e3fd-4fa5-46cd-8acf-b80275fb584d",
+            "kind": "direct",
+            "sessionId": "c2d9e3fd-4fa5-46cd-8acf-b80275fb584d",
+            "updatedAt": 1771261216928,
+            "age": 452761,
+            "systemSent": true,
+            "inputTokens": 83720,
+            "outputTokens": 712,
+            "totalTokens": 38267,
+            "remainingTokens": 1010309,
+            "percentUsed": 4,
+            "model": "gemini-3-flash-preview",
+            "contextTokens": 1048576,
+            "flags": [
+              "system",
+              "id:c2d9e3fd-4fa5-46cd-8acf-b80275fb584d"
+            ]
+          },
+          {
+            "agentId": "main",
+            "key": "agent:main:cron:2ea4d6e9-a870-4c04-b453-41c7646e235a",
+            "kind": "direct",
+            "sessionId": "833552bc-f955-43be-b37b-aeb8da8cbf82",
+            "updatedAt": 1771261200040,
+            "age": 469649,
+            "systemSent": true,
+            "inputTokens": 15565,
+            "outputTokens": 470,
+            "totalTokens": 15565,
+            "remainingTokens": 384435,
+            "percentUsed": 4,
+            "model": "gpt-5-nano",
+            "contextTokens": 400000,
+            "flags": [
+              "system",
+              "id:833552bc-f955-43be-b37b-aeb8da8cbf82"
             ]
           }
         ]
@@ -561,7 +547,7 @@
             "kind": "direct",
             "sessionId": "be4b4927-51a7-44f8-9d00-b2051024142b",
             "updatedAt": 1771255579363,
-            "age": 3435239,
+            "age": 6090326,
             "abortedLastRun": false,
             "inputTokens": 157151,
             "outputTokens": 87,
@@ -587,7 +573,7 @@
             "kind": "direct",
             "sessionId": "8e5e5ad7-28d7-4fe2-b3c1-abb1e364b367",
             "updatedAt": 1770751012346,
-            "age": 508002256,
+            "age": 510657343,
             "abortedLastRun": false,
             "inputTokens": 12764,
             "outputTokens": 112,
@@ -606,7 +592,7 @@
             "kind": "group",
             "sessionId": "25a78794-75fb-4417-ae24-68f3f071dde7",
             "updatedAt": 1770751009678,
-            "age": 508004924,
+            "age": 510660011,
             "totalTokens": 0,
             "remainingTokens": 200000,
             "percentUsed": 0,
@@ -629,7 +615,7 @@
             "kind": "direct",
             "sessionId": "56558044-d2f4-443f-a1f5-8482f58e31dc",
             "updatedAt": 1771257761250,
-            "age": 1253352,
+            "age": 3908439,
             "abortedLastRun": false,
             "inputTokens": 80757,
             "outputTokens": 654,
@@ -655,7 +641,7 @@
             "kind": "direct",
             "sessionId": "5662e8cc-3dfc-4d89-9dd1-57af2478e841",
             "updatedAt": 1771257781331,
-            "age": 1233271,
+            "age": 3888358,
             "abortedLastRun": false,
             "inputTokens": 43666,
             "outputTokens": 444,
@@ -687,7 +673,7 @@
             "kind": "direct",
             "sessionId": "35efacb7-50c5-4316-be4d-4cc0822315ac",
             "updatedAt": 1771257773127,
-            "age": 1241475,
+            "age": 3896562,
             "abortedLastRun": false,
             "inputTokens": 35968,
             "outputTokens": 323,
@@ -760,8 +746,8 @@
   "memory": {
     "agentId": "main",
     "backend": "builtin",
-    "files": 58,
-    "chunks": 2302,
+    "files": 60,
+    "chunks": 2330,
     "dirty": true,
     "workspaceDir": "/home/arnar111/.openclaw/workspace",
     "dbPath": "/home/arnar111/.openclaw/memory/main.sqlite",
@@ -777,17 +763,17 @@
       {
         "source": "memory",
         "files": 26,
-        "chunks": 95
+        "chunks": 97
       },
       {
         "source": "sessions",
-        "files": 32,
-        "chunks": 2207
+        "files": 34,
+        "chunks": 2233
       }
     ],
     "cache": {
       "enabled": true,
-      "entries": 2776
+      "entries": 2814
     },
     "fts": {
       "enabled": true,
@@ -812,7 +798,7 @@
   "disk": {
     "totalGb": 1007,
     "usedGb": 24,
-    "freeGb": 933,
+    "freeGb": 932,
     "percentUsed": 3
   },
   "channels": {
@@ -824,9 +810,6 @@
     }
   },
   "agentActivity": {
-    "main": "🎉 **Virkar!** Raunverulegar skilaboð frá öllum agents: - **Blær (main):** Sí...",
-    "stormur": "Hæ Frost! ⛈️ Þetta er magnað tækifæri til að gera gagnaflæðið sýnilegt! Hér e...",
-    "ylur": "Sælir. Ylur hér. Fyrir pixel-mælaborðið hans Storms er **Firebase listener** ...",
-    "regn": "Hér er mitt mat á því hvernig við getum haldið dependency-trénu léttu með því..."
+    "main": "Implemented **draggable agents + persistent positions + activity glow** in `s..."
   }
 }

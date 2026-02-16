@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
 import { agents, Agent } from '../../data/agents'
 import { useLiveAgents } from '../../hooks/useOpenClaw'
+import AgentCommandPanel from './AgentCommandPanel'
 
 // Office layout positions for each agent's desk
 const deskPositions: Record<string, { x: number; y: number }> = {
@@ -214,8 +215,8 @@ function drawCoffeeMachine(ctx: CanvasRenderingContext2D, x: number, y: number, 
   ctx.fillText('COFFEE', x, y + 10)
 }
 
-function drawAmbientParticles(ctx: CanvasRenderingContext2D, W: number, H: number, time: number) {
-  for (let i = 0; i < 30; i++) {
+function drawAmbientParticles(ctx: CanvasRenderingContext2D, W: number, H: number, time: number, count: number) {
+  for (let i = 0; i < count; i++) {
     const px = (Math.sin(time * 0.001 + i * 7.3) * 0.5 + 0.5) * W
     const py = (Math.cos(time * 0.0008 + i * 4.1) * 0.5 + 0.5) * H
     const alpha = 0.03 + 0.03 * Math.sin(time * 0.003 + i)
@@ -278,14 +279,91 @@ function shadeColor(color: string, amount: number): string {
 export default function OfficeView() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animRef = useRef<number>(0)
+  const particleCountRef = useRef<number>(30)
   const { agents: liveAgents } = useLiveAgents()
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
+
+  const POSITIONS_KEY = 'openpad.office.agentPositions.v1'
+
+  // Persisted + draggable positions (normalized 0..1)
+  const [agentPositions, setAgentPositions] = useState<Record<string, { x: number; y: number }>>(() => {
+    try {
+      const raw = localStorage.getItem(POSITIONS_KEY)
+      if (!raw) return deskPositions
+      const parsed = JSON.parse(raw) as unknown
+      if (!parsed || typeof parsed !== 'object') return deskPositions
+
+      const out: Record<string, { x: number; y: number }> = { ...deskPositions }
+      for (const [id, v] of Object.entries(parsed as Record<string, any>)) {
+        if (!v || typeof v !== 'object') continue
+        const x = Number((v as any).x)
+        const y = Number((v as any).y)
+        if (Number.isFinite(x) && Number.isFinite(y)) {
+          out[id] = { x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) }
+        }
+      }
+      return out
+    } catch {
+      return deskPositions
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(POSITIONS_KEY, JSON.stringify(agentPositions))
+    } catch {
+      // ignore
+    }
+  }, [agentPositions])
+
+  // Display setting: canvas quality (ambient particle count)
+  useEffect(() => {
+    const readQuality = () => {
+      try {
+        const q = localStorage.getItem('openpad:display:canvasQuality')
+        if (q === 'low') particleCountRef.current = 10
+        else if (q === 'high') particleCountRef.current = 60
+        else particleCountRef.current = 30
+      } catch {
+        particleCountRef.current = 30
+      }
+    }
+
+    readQuality()
+    window.addEventListener('openpad:display-settings', readQuality)
+    return () => window.removeEventListener('openpad:display-settings', readQuality)
+  }, [])
 
   // Merge live status into static agents for rendering
   const mergedAgents = agents.map(a => {
     const live = liveAgents.find(la => la.id === a.id)
     return live ? { ...a, status: live.status, currentTask: live.currentTask } : a
   })
+
+  const drawAgentGlow = useCallback((ctx: CanvasRenderingContext2D, cx: number, cy: number, agent: Agent, time: number) => {
+    if (agent.status === 'offline') return
+
+    const rgb = hexToRgb(agent.color)
+    const isActive = agent.status === 'active'
+    const speed = isActive ? 0.008 : 0.0025
+    const pulse = (Math.sin(time * speed + cx * 0.01) + 1) / 2
+
+    const centerY = cy - 30
+    const baseR = isActive ? 42 : 32
+    const r = baseR + pulse * (isActive ? 12 : 6)
+
+    const alphaInner = (isActive ? 0.35 : 0.14) + pulse * (isActive ? 0.15 : 0.06)
+
+    const grad = ctx.createRadialGradient(cx, centerY, 0, cx, centerY, r)
+    grad.addColorStop(0, 'rgba(' + rgb + ', ' + alphaInner + ')')
+    grad.addColorStop(0.55, 'rgba(' + rgb + ', ' + (alphaInner * 0.45) + ')')
+    grad.addColorStop(1, 'rgba(0,0,0,0)')
+
+    ctx.fillStyle = grad
+    ctx.beginPath()
+    ctx.arc(cx, centerY, r, 0, Math.PI * 2)
+    ctx.fill()
+  }, [])
 
   const draw = useCallback((time: number) => {
     const canvas = canvasRef.current
@@ -303,7 +381,7 @@ export default function OfficeView() {
     drawCheckerFloor(ctx, W, H)
 
     // Ambient particles
-    drawAmbientParticles(ctx, W, H, time)
+    drawAmbientParticles(ctx, W, H, time, 30)
 
     // Walls
     drawWalls(ctx, W, H)
@@ -317,10 +395,11 @@ export default function OfficeView() {
 
     // Desks and agents
     mergedAgents.forEach((agent) => {
-      const pos = deskPositions[agent.id]
+      const pos = agentPositions[agent.id] || deskPositions[agent.id]
       if (!pos) return
       const dx = pos.x * W, dy = pos.y * H
       drawDesk(ctx, dx, dy, agent, time)
+      drawAgentGlow(ctx, dx, dy, agent, time)
       drawAgent(ctx, dx, dy, agent, time)
     })
 
@@ -332,11 +411,14 @@ export default function OfficeView() {
     ctx.fillRect(0, 0, W, H)
 
     animRef.current = requestAnimationFrame(draw)
-  }, [])
+  }, [agentPositions, drawAgentGlow, mergedAgents])
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
+
+    // Prevent touch scrolling while dragging on iPad
+    canvas.style.touchAction = 'none'
 
     const resize = () => {
       const dpr = window.devicePixelRatio || 1
@@ -356,36 +438,150 @@ export default function OfficeView() {
     window.addEventListener('resize', resize)
     animRef.current = requestAnimationFrame(draw)
 
-    // Click detection
-    const handleClick = (e: MouseEvent) => {
+    const getCanvasPointFromMouse = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
-      const cx = e.clientX - rect.left
-      const cy = e.clientY - rect.top
-      const W = rect.width
-      const H = rect.height
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top, W: rect.width, H: rect.height }
+    }
 
-      let found: Agent | null = null
+    const getCanvasPointFromTouch = (e: TouchEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      const t = e.touches[0] || e.changedTouches[0]
+      return { x: t.clientX - rect.left, y: t.clientY - rect.top, W: rect.width, H: rect.height }
+    }
+
+    const hitTestAgent = (cx: number, cy: number, W: number, H: number): Agent | null => {
       for (const agent of mergedAgents) {
-        const pos = deskPositions[agent.id]
+        const pos = agentPositions[agent.id] || deskPositions[agent.id]
         if (!pos) continue
         const ax = pos.x * W
         const ay = pos.y * H - 30
         if (Math.abs(cx - ax) < 40 && Math.abs(cy - ay) < 40) {
-          found = agent
-          break
+          return agent
         }
       }
-      setSelectedAgent(found)
+      return null
     }
 
-    canvas.addEventListener('click', handleClick)
+    const clamp01 = (n: number) => Math.max(0, Math.min(1, n))
+
+    const dragRef: {
+      draggingId: string | null
+      startX: number
+      startY: number
+      startPos: { x: number; y: number } | null
+      moved: boolean
+    } = { draggingId: null, startX: 0, startY: 0, startPos: null, moved: false }
+
+    const DRAG_THRESHOLD = 6
+
+    let onMouseMove: ((e: MouseEvent) => void) | null = null
+    let onMouseUp: ((e: MouseEvent) => void) | null = null
+    let onTouchMove: ((e: TouchEvent) => void) | null = null
+    let onTouchEnd: ((e: TouchEvent) => void) | null = null
+
+    const beginDrag = (agentId: string, x: number, y: number, W: number, H: number) => {
+      const pos = agentPositions[agentId] || deskPositions[agentId]
+      if (!pos) return
+      dragRef.draggingId = agentId
+      dragRef.startX = x
+      dragRef.startY = y
+      dragRef.startPos = { ...pos }
+      dragRef.moved = false
+
+      // If you start dragging something else, hide previous selection until drop/click resolves
+      setSelectedAgent(null)
+
+      const updateDrag = (nx: number, ny: number) => {
+        if (!dragRef.draggingId || !dragRef.startPos) return
+        const dx = nx - dragRef.startX
+        const dy = ny - dragRef.startY
+        if (!dragRef.moved && Math.hypot(dx, dy) > DRAG_THRESHOLD) dragRef.moved = true
+
+        const nextX = clamp01(dragRef.startPos.x + dx / W)
+        const nextY = clamp01(dragRef.startPos.y + dy / H)
+
+        setAgentPositions(prev => ({ ...prev, [dragRef.draggingId as string]: { x: nextX, y: nextY } }))
+      }
+
+      const endDrag = () => {
+        const wasMoved = dragRef.moved
+        const releasedId = dragRef.draggingId
+        dragRef.draggingId = null
+        dragRef.startPos = null
+
+        if (!wasMoved && releasedId) {
+          // Treat as click
+          const clicked = mergedAgents.find(a => a.id === releasedId) || null
+          setSelectedAgent(clicked)
+        }
+
+        if (onMouseMove) window.removeEventListener('mousemove', onMouseMove)
+        if (onMouseUp) window.removeEventListener('mouseup', onMouseUp)
+        if (onTouchMove) window.removeEventListener('touchmove', onTouchMove)
+        if (onTouchEnd) window.removeEventListener('touchend', onTouchEnd)
+      }
+
+      onMouseMove = (e: MouseEvent) => {
+        const p = getCanvasPointFromMouse(e)
+        updateDrag(p.x, p.y)
+      }
+
+      onMouseUp = () => {
+        endDrag()
+      }
+
+      onTouchMove = (e: TouchEvent) => {
+        e.preventDefault()
+        const p = getCanvasPointFromTouch(e)
+        updateDrag(p.x, p.y)
+      }
+
+      onTouchEnd = (e: TouchEvent) => {
+        e.preventDefault()
+        endDrag()
+      }
+
+      window.addEventListener('mousemove', onMouseMove)
+      window.addEventListener('mouseup', onMouseUp)
+      window.addEventListener('touchmove', onTouchMove, { passive: false })
+      window.addEventListener('touchend', onTouchEnd, { passive: false })
+    }
+
+    const handleMouseDown = (e: MouseEvent) => {
+      const p = getCanvasPointFromMouse(e)
+      const found = hitTestAgent(p.x, p.y, p.W, p.H)
+      if (!found) {
+        setSelectedAgent(null)
+        return
+      }
+      beginDrag(found.id, p.x, p.y, p.W, p.H)
+    }
+
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault()
+      const p = getCanvasPointFromTouch(e)
+      const found = hitTestAgent(p.x, p.y, p.W, p.H)
+      if (!found) {
+        setSelectedAgent(null)
+        return
+      }
+      beginDrag(found.id, p.x, p.y, p.W, p.H)
+    }
+
+    canvas.addEventListener('mousedown', handleMouseDown)
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false })
 
     return () => {
       window.removeEventListener('resize', resize)
-      canvas.removeEventListener('click', handleClick)
+      canvas.removeEventListener('mousedown', handleMouseDown)
+      canvas.removeEventListener('touchstart', handleTouchStart)
+      if (onMouseMove) window.removeEventListener('mousemove', onMouseMove)
+      if (onMouseUp) window.removeEventListener('mouseup', onMouseUp)
+      if (onTouchMove) window.removeEventListener('touchmove', onTouchMove)
+      if (onTouchEnd) window.removeEventListener('touchend', onTouchEnd)
       cancelAnimationFrame(animRef.current)
     }
-  }, [draw, mergedAgents])
+  }, [agentPositions, draw, mergedAgents])
 
   const statusLabel = (s: string) => s === 'active' ? '🟢 Active' : s === 'idle' ? '🟡 Idle' : '🔴 Offline'
 
@@ -396,9 +592,9 @@ export default function OfficeView() {
         <div
           className="absolute bottom-6 left-1/2 -translate-x-1/2 px-6 py-4 rounded-xl border animate-slide-up backdrop-blur-sm cursor-pointer"
           style={{
-            background: `linear-gradient(135deg, ${selectedAgent.color}15, rgba(17,17,40,0.95))`,
+            background: 'linear-gradient(135deg, ' + selectedAgent.color + '15, rgba(17,17,40,0.95))',
             borderColor: selectedAgent.color + '40',
-            boxShadow: `0 0 30px ${selectedAgent.color}20`,
+            boxShadow: '0 0 30px ' + selectedAgent.color + '20',
           }}
           onClick={() => setSelectedAgent(null)}
         >
