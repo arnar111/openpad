@@ -117,19 +117,40 @@ export function useLiveAgents(): { agents: LiveAgent[]; connected: boolean } {
 
     // Get model from config
     const agentConfig = status.agents?.list?.find((a: { id: string }) => a.id === openclawId)
-    const model = agentConfig?.model?.primary || 
-      (agent.id === 'frost' ? 'discord-bot' : 
-       agent.id === 'ylur' || agent.id === 'stormur' ? 'subagent' :
-       status.sessions.defaults.model)
+    // Get model: prefer what's actually being used in sessions, then config, then agent default
+    const sessionModel = lastSession?.model || null
+    const configModel = agentConfig?.model?.primary || null
+    const model = sessionModel || configModel || agent.model || status.sessions.defaults.model
 
-    // Better task description
-    let task = agent.currentTask
-    if (lastSession) {
-      const key = lastSession.key
-      if (key.includes('subagent')) task = 'Building OpenPad'
-      else if (key.includes('discord')) task = 'Discord coordination'
-      else if (key.includes('cron')) task = `Cron: ${lastSession.model}`
-      else if (key.includes('main')) task = 'Main session active'
+    // Derive meaningful task from session activity
+    let task = '—'
+    if (agent.isHuman) {
+      task = activeSessions > 0 ? `${activeSessions} active conversations` : 'Away'
+    } else if (agentSessions.length === 0) {
+      task = 'Standby'
+    } else {
+      // Categorize sessions
+      const discordSessions = agentSessions.filter(s => s.key.includes('discord'))
+      const cronSessions = agentSessions.filter(s => s.key.includes('cron'))
+      const mainSessions = agentSessions.filter(s => s.key.includes(':main') && !s.key.includes('cron') && !s.key.includes('discord'))
+      const subagentSessions = agentSessions.filter(s => s.key.includes('subagent') || s.key.includes('spawn'))
+
+      const parts: string[] = []
+      if (mainSessions.length > 0) parts.push('Direct chat')
+      if (discordSessions.length > 0) parts.push(`Discord (${discordSessions.length} ch)`)
+      if (cronSessions.length > 0) parts.push(`${cronSessions.length} cron jobs`)
+      if (subagentSessions.length > 0) parts.push(`${subagentSessions.length} sub-tasks`)
+
+      if (parts.length > 0) {
+        task = parts.join(' · ')
+      } else {
+        task = `${agentSessions.length} session${agentSessions.length > 1 ? 's' : ''}`
+      }
+
+      // Add token activity indicator
+      if (totalTokens > 100000) {
+        task += ` 🔥`
+      }
     }
 
     return {
