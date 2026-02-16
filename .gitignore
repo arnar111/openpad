@@ -4,3 +4,4 @@ dist
 public/data/
 tsconfig.tsbuildinfo
 .env
+bridge-node.js
