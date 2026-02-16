@@ -20,7 +20,7 @@ const firebaseConfig: FirebaseOptions = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:641819620338:web:e4bd6093fe92da6c1db16b',
   databaseURL:
     import.meta.env.VITE_FIREBASE_DATABASE_URL ||
-    'https://openpad-b903a-default-rtdb.firebaseio.com',
+    'https://openpad-b903a-default-rtdb.europe-west1.firebasedatabase.app',
 }
 
 export const firebaseApp = initializeApp(firebaseConfig)

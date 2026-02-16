@@ -24,7 +24,7 @@ const firebaseConfig = {
   storageBucket: 'openpad-b903a.firebasestorage.app',
   messagingSenderId: '641819620338',
   appId: '1:641819620338:web:e4bd6093fe92da6c1db16b',
-  databaseURL: 'https://openpad-b903a-default-rtdb.firebaseio.com',
+  databaseURL: 'https://openpad-b903a-default-rtdb.europe-west1.firebasedatabase.app',
 }
 
 let db = null
