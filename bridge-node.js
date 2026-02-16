@@ -75,6 +75,43 @@ async function update() {
       '87e706a8-a351-4171-a8fb-beba16928551': 'Memory Maintenance',
     }
 
+    // Extract last activity per agent from transcript files
+    const agentLastTask = {}
+    const seenAgents = new Set()
+    for (const s of (raw.sessions?.recent || []).slice(0, 30)) {
+      const agentId = s.agentId
+      if (seenAgents.has(agentId)) continue
+      seenAgents.add(agentId)
+      
+      try {
+        const transcriptPath = `/home/arnar111/.openclaw/agents/${agentId}/sessions/${s.sessionId}.jsonl`
+        const content = execSync(`tail -10 "${transcriptPath}" 2>/dev/null`, { encoding: 'utf8', timeout: 2000 })
+        const lines = content.trim().split('\n').reverse()
+        
+        for (const line of lines) {
+          try {
+            const entry = JSON.parse(line)
+            const msg = entry.message || entry
+            if (msg.role === 'assistant') {
+              let text = ''
+              if (Array.isArray(msg.content)) {
+                const textPart = msg.content.find(c => c.type === 'text' && c.text)
+                text = textPart?.text || ''
+              } else if (typeof msg.content === 'string') {
+                text = msg.content
+              }
+              if (text && text !== 'NO_REPLY' && text !== 'HEARTBEAT_OK' && text.length > 5) {
+                // Clean and truncate
+                const clean = text.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
+                agentLastTask[agentId] = clean.length > 80 ? clean.substring(0, 77) + '...' : clean
+                break
+              }
+            }
+          } catch {}
+        }
+      } catch {}
+    }
+
     // Enrich sessions with labels
     const enrichedSessions = { ...raw.sessions }
     if (enrichedSessions.recent) {
@@ -112,7 +149,8 @@ async function update() {
       channels: {
         whatsapp: { linked: raw.linkChannel?.linked || false },
         discord: { configured: true }
-      }
+      },
+      agentActivity: agentLastTask,
     }
 
     // Write local files
