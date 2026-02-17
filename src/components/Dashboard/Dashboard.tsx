@@ -122,7 +122,7 @@ export default function Dashboard() {
       </div>
 
       {/* System health */}
-      <div className="grid grid-cols-6 gap-3 mb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
         {[
           { label: 'MEMORY', value: health.memory, color: '#00BFFF', sub: `${health.memoryPercent}%` },
           { label: 'DISK', value: health.disk, color: '#7B68EE', sub: `${health.diskPercent}%` },
@@ -152,7 +152,7 @@ export default function Dashboard() {
       </div>
 
       {/* Agent cards */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {liveAgents.map((agent) => (
           <AgentCard key={agent.id} agent={agent} />
         ))}

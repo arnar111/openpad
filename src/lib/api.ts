@@ -68,6 +68,7 @@ export interface OpenClawStatus {
     whatsapp: { linked: boolean; number?: string }
     discord: { configured: boolean }
   }
+  agentActivity?: Record<string, string>
   memory: {
     files: number
     chunks: number

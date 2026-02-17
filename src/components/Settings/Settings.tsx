@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { agents as staticAgents } from '../../data/agents'
 import { LiveAgent, useLiveAgents, useOpenClawStatus } from '../../hooks/useOpenClaw'
 
-const OPENPAD_VERSION = '1.2.0'
+const OPENPAD_VERSION = '2.0.0'
 
 const LS_PIXEL_FONT = 'openpad:display:pixelFont'
 const LS_CANVAS_QUALITY = 'openpad:display:canvasQuality'

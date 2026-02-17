@@ -4,4 +4,6 @@ dist
 public/data/
 tsconfig.tsbuildinfo
 .env
+.env.*
+netlify-env-vars.txt
 bridge-node.js

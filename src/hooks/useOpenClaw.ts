@@ -139,7 +139,7 @@ export function useLiveAgents(): { agents: LiveAgent[]; connected: boolean } {
     const model = sessionModel || configModel || agent.model || status.sessions.defaults.model
 
     // Get real task from agentActivity (extracted from transcripts)
-    const agentActivity = (status as any).agentActivity || {}
+    const agentActivity = status.agentActivity || {}
     const openclawAgentId = Object.entries(AGENT_ID_MAP).find(([, padId]) => padId === agent.id)?.[0]
     // Check both mapped ID and direct agent ID
     const realTask = openclawAgentId 
@@ -158,13 +158,13 @@ export function useLiveAgents(): { agents: LiveAgent[]; connected: boolean } {
     } else {
       // Fallback: show session info
       const recentWithName = agentSessions
-        .filter(s => (s as any).displayName)
+        .filter(s => (s as SessionData & { displayName?: string }).displayName)
         .sort((a, b) => b.updatedAt - a.updatedAt)
 
       if (recentWithName.length > 0) {
-        const recent = recentWithName[0] as any
+        const recent = recentWithName[0] as SessionData & { displayName?: string }
         const others = recentWithName.length - 1
-        task = recent.displayName + (others > 0 ? ` +${others} more` : '')
+        task = (recent.displayName || 'Session') + (others > 0 ? ` +${others} more` : '')
       } else {
         task = `${agentSessions.length} sessions`
       }
@@ -194,7 +194,9 @@ export function useSystemHealth() {
       connected: false,
       cpu: '—',
       memory: '—',
+      memoryPercent: 0,
       disk: '—',
+      diskPercent: 0,
       sessions: 0,
       uptime: '—',
       whatsapp: false,
@@ -206,7 +208,7 @@ export function useSystemHealth() {
     }
   }
 
-  const os = status.os || {} as any
+  const os = status.os || { platform: '', arch: '', hostname: '', uptime: 0, freeMemMb: 0, totalMemMb: 0, cpuCount: 0, nodeVersion: '' }
   const uptimeSec = os.uptime || 0
   const days = Math.floor(uptimeSec / 86400)
   const hours = Math.floor((uptimeSec % 86400) / 3600)
@@ -224,8 +226,8 @@ export function useSystemHealth() {
     whatsapp: status.channels?.whatsapp?.linked || false,
     discord: status.channels?.discord?.configured || false,
     totalSessions: status.sessions?.count || 0,
-    memoryFiles: (status.memory as any)?.files || 0,
-    memoryChunks: (status.memory as any)?.chunks || 0,
-    gatewayLatency: (status.gateway as any)?.latencyMs || 0,
+    memoryFiles: status.memory?.files || 0,
+    memoryChunks: status.memory?.chunks || 0,
+    gatewayLatency: status.gateway?.latencyMs || 0,
   }
 }
