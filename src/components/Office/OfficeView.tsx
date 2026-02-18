@@ -24,257 +24,499 @@ const plants = [
 ]
 const serverRack = { x: 0.92, y: 0.88 }
 
-function drawPixelRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string) {
-  ctx.fillStyle = color
+// ===== Animation System =====
+
+const WALK_SPEED = 0.13
+const EVENT_MIN = 8000
+const EVENT_MAX = 15000
+
+const wcSpots = [{ x: 0.07, y: 0.80 }, { x: 0.03, y: 0.80 }]
+const coffeeSpot = { x: 0.15, y: 0.82 }
+const mSeats = [
+  { x: 0.39, y: 0.41 }, { x: 0.57, y: 0.41 },
+  { x: 0.39, y: 0.56 }, { x: 0.57, y: 0.56 },
+]
+
+const sTxt = [
+  'Hæ!','Flott!','LGTM!','Ship it!','Deploy?',
+  'Nice!','PR ready?','Standup!','Bless!','Takk!',
+  'Wow!','Já!','Hmm...','Roger!','Sæll!',
+]
+const tTxt = [
+  'hmm...','kaffi...','bug?','refactor?',
+  '...','API...','tests...','design...','perf...',
+]
+const mTxt = [
+  'Q2 goals?','Ship it!','KPIs...','Roadmap?',
+  'Sprint!','Backlog','MVP!','Demo time!','OKRs?',
+]
+
+interface AnimS {
+  state: 'at_desk' | 'walking' | 'at_location'
+  x: number; y: number
+  fromX: number; fromY: number
+  toX: number; toY: number
+  walkStart: number; walkDur: number
+  faceR: boolean; retHome: boolean
+  act: 'none'|'wc'|'coffee'|'meeting'|'visit'
+  arrTime: number; stayDur: number
+  partner: string | null
+}
+
+interface Sched {
+  lastEvt: number; nextDel: number
+  states: Record<string, AnimS>
+}
+
+function mkAnim(x: number, y: number): AnimS {
+  return {
+    state:'at_desk', x, y,
+    fromX:x, fromY:y, toX:x, toY:y,
+    walkStart:0, walkDur:0,
+    faceR:true, retHome:false,
+    act:'none', arrTime:0, stayDur:0,
+    partner:null,
+  }
+}
+
+function goWalk(a: AnimS, tx: number, ty: number, t: number, ret: boolean) {
+  const dx = tx - a.x, dy = ty - a.y
+  const dist = Math.sqrt(dx*dx + dy*dy)
+  a.state = 'walking'
+  a.fromX = a.x; a.fromY = a.y
+  a.toX = tx; a.toY = ty
+  a.walkStart = t
+  a.walkDur = Math.max(1200, (dist / WALK_SPEED) * 1000)
+  a.faceR = dx >= 0
+  a.retHome = ret
+}
+
+function ease(t: number) {
+  return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2) / 2
+}
+
+function sHash(s: string) {
+  let h = 0
+  for (let i = 0; i < s.length; i++) { h = ((h<<5)-h)+s.charCodeAt(i); h |= 0 }
+  return Math.abs(h)
+}
+
+function pick<T>(a: T[], n: number): T[] {
+  return [...a].sort(() => Math.random()-0.5).slice(0, n)
+}
+
+function rng(a: number, b: number) { return a + Math.random()*(b-a) }
+
+// ===== Draw Helpers =====
+
+function px(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, c: string) {
+  ctx.fillStyle = c
   ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h))
 }
 
-function drawCheckerFloor(ctx: CanvasRenderingContext2D, W: number, H: number) {
-  const size = 32
-  for (let row = 0; row < H / size + 1; row++) {
-    for (let col = 0; col < W / size + 1; col++) {
-      const dark = (row + col) % 2 === 0
-      ctx.fillStyle = dark ? '#0d0d22' : '#111133'
-      ctx.fillRect(col * size, row * size, size, size)
-    }
-  }
-  // subtle grid lines
-  ctx.strokeStyle = 'rgba(60,60,120,0.15)'
-  ctx.lineWidth = 1
-  for (let i = 0; i < W; i += size) {
-    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke()
-  }
-  for (let i = 0; i < H; i += size) {
-    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke()
-  }
+function rr(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath()
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y)
+  ctx.arcTo(x+w, y, x+w, y+r, r); ctx.lineTo(x+w, y+h-r)
+  ctx.arcTo(x+w, y+h, x+w-r, y+h, r); ctx.lineTo(x+r, y+h)
+  ctx.arcTo(x, y+h, x, y+h-r, r); ctx.lineTo(x, y+r)
+  ctx.arcTo(x, y, x+r, y, r); ctx.closePath()
 }
 
-function drawDesk(ctx: CanvasRenderingContext2D, cx: number, cy: number, agent: Agent, time: number) {
-  const dw = 72, dh = 36
-  // desk surface
-  drawPixelRect(ctx, cx - dw / 2, cy, dw, dh, '#1a1a3a')
-  drawPixelRect(ctx, cx - dw / 2 + 2, cy + 2, dw - 4, dh - 4, '#222250')
-  // monitor
-  const mw = 28, mh = 20
-  const mx = cx - mw / 2, my = cy - mh + 4
-  drawPixelRect(ctx, mx, my, mw, mh, '#0a0a18')
-  drawPixelRect(ctx, mx + 2, my + 2, mw - 4, mh - 6, '#1a2a4a')
-  // screen glow
-  const screenFlicker = 0.7 + 0.3 * Math.sin(time * 0.003 + cx)
-  ctx.fillStyle = `rgba(${hexToRgb(agent.color)}, ${0.15 * screenFlicker})`
-  ctx.fillRect(mx + 2, my + 2, mw - 4, mh - 6)
-  // monitor stand
-  drawPixelRect(ctx, cx - 3, my + mh - 2, 6, 4, '#333360')
-  // keyboard
-  drawPixelRect(ctx, cx - 12, cy + 8, 24, 6, '#2a2a50')
-  // small colored accent on desk
-  drawPixelRect(ctx, cx + dw / 2 - 14, cy + 4, 8, 8, agent.color + '60')
+function h2r(hex: string): string {
+  return `${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)}`
+}
+
+function shade(c: string, a: number): string {
+  let r = parseInt(c.slice(1,3),16)+a
+  let g = parseInt(c.slice(3,5),16)+a
+  let b = parseInt(c.slice(5,7),16)+a
+  r = Math.max(0,Math.min(255,r))
+  g = Math.max(0,Math.min(255,g))
+  b = Math.max(0,Math.min(255,b))
+  return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`
+}
+
+// ===== Scene Drawing =====
+
+function drawFloor(ctx: CanvasRenderingContext2D, W: number, H: number) {
+  const s = 32
+  for (let r = 0; r < H/s+1; r++)
+    for (let c = 0; c < W/s+1; c++) {
+      ctx.fillStyle = (r+c)%2===0 ? '#0d0d22' : '#111133'
+      ctx.fillRect(c*s, r*s, s, s)
+    }
+  ctx.strokeStyle = 'rgba(60,60,120,0.15)'; ctx.lineWidth = 1
+  for (let i = 0; i < W; i += s) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,H); ctx.stroke() }
+  for (let i = 0; i < H; i += s) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(W,i); ctx.stroke() }
+}
+
+function drawDesk(ctx: CanvasRenderingContext2D, cx: number, cy: number, agent: Agent, time: number, away: boolean) {
+  const dw=72, dh=36
+  px(ctx, cx-dw/2, cy, dw, dh, '#1a1a3a')
+  px(ctx, cx-dw/2+2, cy+2, dw-4, dh-4, '#222250')
+  const mw=28, mh=20, mx=cx-mw/2, my=cy-mh+4
+  px(ctx, mx, my, mw, mh, '#0a0a18')
+  px(ctx, mx+2, my+2, mw-4, mh-6, away ? '#0e1528' : '#1a2a4a')
+  if (!away) {
+    const fl = 0.7 + 0.3*Math.sin(time*0.003+cx)
+    ctx.fillStyle = `rgba(${h2r(agent.color)}, ${0.15*fl})`
+    ctx.fillRect(mx+2, my+2, mw-4, mh-6)
+  } else {
+    const p = 0.03 + 0.02*Math.sin(time*0.002)
+    ctx.fillStyle = `rgba(${h2r(agent.color)}, ${p})`
+    ctx.fillRect(mx+2, my+2, mw-4, mh-6)
+  }
+  px(ctx, cx-3, my+mh-2, 6, 4, '#333360')
+  px(ctx, cx-12, cy+8, 24, 6, '#2a2a50')
+  px(ctx, cx+dw/2-14, cy+4, 8, 8, agent.color+'60')
+}
+
+function drawTyping(ctx: CanvasRenderingContext2D, cx: number, cy: number, agent: Agent, time: number) {
+  const h = sHash(agent.id)
+  const t = (time + h*137) % 6000
+  if (t > 3500) return
+  const col = agent.color + '90'
+  if (Math.sin(time*0.02+h*3) > 0.2) px(ctx, cx-8, cy+10, 2, 2, col)
+  if (Math.sin(time*0.025+h*5) > 0.1) px(ctx, cx, cy+10, 2, 2, col)
+  if (Math.sin(time*0.018+h*7) > 0.3) px(ctx, cx+6, cy+10, 2, 2, col)
 }
 
 function drawAgent(ctx: CanvasRenderingContext2D, cx: number, cy: number, agent: Agent, time: number) {
-  const breathe = Math.sin(time * 0.004 + cx * 0.01) * 2
-  const ay = cy - 30 + breathe
+  const br = Math.sin(time*0.004+cx*0.01)*2
+  const ay = cy - 30 + br
+  const c = agent.color, dk = shade(c, -40)
 
-  const c = agent.color
-  const darker = shadeColor(c, -40)
-
-  // Shadow
   ctx.fillStyle = 'rgba(0,0,0,0.3)'
-  ctx.beginPath()
-  ctx.ellipse(cx, cy - 2, 10, 4, 0, 0, Math.PI * 2)
-  ctx.fill()
+  ctx.beginPath(); ctx.ellipse(cx, cy-2, 10, 4, 0, 0, Math.PI*2); ctx.fill()
 
-  // Body (pixel style)
-  drawPixelRect(ctx, cx - 8, ay, 16, 16, c)
-  drawPixelRect(ctx, cx - 6, ay + 2, 12, 12, darker)
-  // shoulders
-  drawPixelRect(ctx, cx - 10, ay + 4, 4, 8, c)
-  drawPixelRect(ctx, cx + 6, ay + 4, 4, 8, c)
+  px(ctx, cx-8, ay, 16, 16, c)
+  px(ctx, cx-6, ay+2, 12, 12, dk)
+  px(ctx, cx-10, ay+4, 4, 8, c)
+  px(ctx, cx+6, ay+4, 4, 8, c)
 
-  // Head
-  const headY = ay - 12
-  drawPixelRect(ctx, cx - 6, headY, 12, 12, agent.isHuman ? '#ffd5a0' : c)
-  // eyes
-  drawPixelRect(ctx, cx - 3, headY + 4, 2, 2, '#111')
-  drawPixelRect(ctx, cx + 1, headY + 4, 2, 2, '#111')
-  // mouth
-  drawPixelRect(ctx, cx - 2, headY + 8, 4, 1, '#111')
+  const hy = ay - 12
+  px(ctx, cx-6, hy, 12, 12, agent.isHuman ? '#ffd5a0' : c)
+  px(ctx, cx-3, hy+4, 2, 2, '#111')
+  px(ctx, cx+1, hy+4, 2, 2, '#111')
+  px(ctx, cx-2, hy+8, 4, 1, '#111')
 
-  // Hair / top accent
-  if (agent.isHuman) {
-    drawPixelRect(ctx, cx - 7, headY - 2, 14, 4, '#8B6914')
-  } else {
-    drawPixelRect(ctx, cx - 7, headY - 2, 14, 3, darker)
-  }
+  if (agent.isHuman) px(ctx, cx-7, hy-2, 14, 4, '#8B6914')
+  else px(ctx, cx-7, hy-2, 14, 3, dk)
 
-  // Status dot
-  const statusColor = agent.status === 'active' ? '#00ff88' : agent.status === 'idle' ? '#ffcc00' : '#ff4444'
-  ctx.fillStyle = statusColor
-  ctx.beginPath()
-  ctx.arc(cx + 10, headY, 3, 0, Math.PI * 2)
-  ctx.fill()
-  // dot glow
-  ctx.fillStyle = statusColor + '40'
-  ctx.beginPath()
-  ctx.arc(cx + 10, headY, 6, 0, Math.PI * 2)
-  ctx.fill()
+  const sc = agent.status==='active' ? '#00ff88' : agent.status==='idle' ? '#ffcc00' : '#ff4444'
+  ctx.fillStyle = sc; ctx.beginPath(); ctx.arc(cx+10, hy, 3, 0, Math.PI*2); ctx.fill()
+  ctx.fillStyle = sc+'40'; ctx.beginPath(); ctx.arc(cx+10, hy, 6, 0, Math.PI*2); ctx.fill()
 
-  // Name label
   ctx.font = '8px "Press Start 2P", monospace'
-  ctx.textAlign = 'center'
-  ctx.fillStyle = c
-  ctx.fillText(`${agent.emoji} ${agent.name}`, cx, ay - 20)
-
-  // Role
+  ctx.textAlign = 'center'; ctx.fillStyle = c
+  ctx.fillText(`${agent.emoji} ${agent.name}`, cx, ay-20)
   ctx.font = '6px "Press Start 2P", monospace'
   ctx.fillStyle = '#666688'
-  ctx.fillText(agent.role, cx, ay - 12)
+  ctx.fillText(agent.role, cx, ay-12)
 }
 
-function drawMeetingTable(ctx: CanvasRenderingContext2D, W: number, H: number) {
-  const cx = meetingTable.x * W, cy = meetingTable.y * H
-  const rw = meetingTable.w * W / 2, rh = meetingTable.h * H / 2
-  // shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)'
-  ctx.beginPath()
-  ctx.ellipse(cx, cy + 4, rw + 2, rh + 2, 0, 0, Math.PI * 2)
-  ctx.fill()
-  // table
-  ctx.fillStyle = '#1f1f42'
-  ctx.beginPath()
-  ctx.ellipse(cx, cy, rw, rh, 0, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.strokeStyle = '#333366'
-  ctx.lineWidth = 2
-  ctx.stroke()
-  // surface highlight
-  ctx.fillStyle = 'rgba(100,100,200,0.05)'
-  ctx.beginPath()
-  ctx.ellipse(cx, cy - 3, rw - 6, rh - 4, 0, 0, Math.PI * 2)
-  ctx.fill()
-  // label
+function drawWalker(ctx: CanvasRenderingContext2D, cx: number, cy: number, agent: Agent, time: number, fR: boolean) {
+  const wc = time * 0.008
+  const bounce = Math.abs(Math.sin(wc)) * 3
+  const ay = cy - 22 - bounce
+  const c = agent.color, dk = shade(c, -40)
+
+  ctx.fillStyle = 'rgba(0,0,0,0.25)'
+  ctx.beginPath(); ctx.ellipse(cx, cy, 8, 3, 0, 0, Math.PI*2); ctx.fill()
+
+  const ls = Math.sin(wc)*4
+  px(ctx, cx-4, ay+14+Math.max(0,ls), 4, 8, dk)
+  px(ctx, cx, ay+14+Math.max(0,-ls), 4, 8, dk)
+
+  px(ctx, cx-7, ay, 14, 14, c)
+  px(ctx, cx-5, ay+2, 10, 10, dk)
+
+  const as2 = Math.sin(wc)*3
+  px(ctx, cx-9, ay+3+as2, 4, 7, c)
+  px(ctx, cx+5, ay+3-as2, 4, 7, c)
+
+  const hy = ay - 10
+  px(ctx, cx-5, hy, 10, 10, agent.isHuman ? '#ffd5a0' : c)
+  const eo = fR ? 1 : -1
+  px(ctx, cx-2+eo, hy+3, 2, 2, '#111')
+  px(ctx, cx+2+eo, hy+3, 2, 2, '#111')
+  px(ctx, cx-1+eo, hy+7, 3, 1, '#111')
+
+  if (agent.isHuman) px(ctx, cx-6, hy-2, 12, 3, '#8B6914')
+  else px(ctx, cx-6, hy-2, 12, 3, dk)
+
+  const sc = agent.status==='active' ? '#00ff88' : agent.status==='idle' ? '#ffcc00' : '#ff4444'
+  ctx.fillStyle = sc; ctx.beginPath(); ctx.arc(cx+8, hy, 2.5, 0, Math.PI*2); ctx.fill()
+
   ctx.font = '6px "Press Start 2P", monospace'
-  ctx.fillStyle = '#444466'
-  ctx.textAlign = 'center'
-  ctx.fillText('MEETING TABLE', cx, cy + 3)
+  ctx.textAlign = 'center'; ctx.fillStyle = c
+  ctx.fillText(agent.name, cx, ay-14)
+
+  const dp = time*0.01, da = 0.08+0.04*Math.sin(dp)
+  const dx2 = fR ? cx-8 : cx+8
+  ctx.fillStyle = `rgba(150,150,200,${da})`
+  ctx.fillRect(dx2+Math.sin(dp*2)*2, cy-1, 3, 2)
+  ctx.fillRect(dx2+Math.sin(dp*3+1)*3, cy-3, 2, 2)
+}
+
+function drawStander(ctx: CanvasRenderingContext2D, cx: number, cy: number, agent: Agent, time: number) {
+  const br = Math.sin(time*0.004+cx*0.01)*1.5
+  const ay = cy - 22 + br
+  const c = agent.color, dk = shade(c, -40)
+
+  ctx.fillStyle = 'rgba(0,0,0,0.25)'
+  ctx.beginPath(); ctx.ellipse(cx, cy, 8, 3, 0, 0, Math.PI*2); ctx.fill()
+
+  px(ctx, cx-4, ay+14, 4, 8, dk)
+  px(ctx, cx, ay+14, 4, 8, dk)
+
+  px(ctx, cx-7, ay, 14, 14, c)
+  px(ctx, cx-5, ay+2, 10, 10, dk)
+  px(ctx, cx-9, ay+3, 4, 7, c)
+  px(ctx, cx+5, ay+3, 4, 7, c)
+
+  const hy = ay - 10
+  px(ctx, cx-5, hy, 10, 10, agent.isHuman ? '#ffd5a0' : c)
+  px(ctx, cx-2, hy+3, 2, 2, '#111')
+  px(ctx, cx+2, hy+3, 2, 2, '#111')
+  px(ctx, cx-1, hy+7, 3, 1, '#111')
+
+  if (agent.isHuman) px(ctx, cx-6, hy-2, 12, 3, '#8B6914')
+  else px(ctx, cx-6, hy-2, 12, 3, dk)
+
+  const sc = agent.status==='active' ? '#00ff88' : agent.status==='idle' ? '#ffcc00' : '#ff4444'
+  ctx.fillStyle = sc; ctx.beginPath(); ctx.arc(cx+8, hy, 2.5, 0, Math.PI*2); ctx.fill()
+
+  ctx.font = '6px "Press Start 2P", monospace'
+  ctx.textAlign = 'center'; ctx.fillStyle = c
+  ctx.fillText(agent.name, cx, ay-14)
+}
+
+function drawSpeech(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, alpha: number) {
+  ctx.save(); ctx.globalAlpha = alpha
+  ctx.font = '6px "Press Start 2P", monospace'
+  const tw = ctx.measureText(text).width
+  const pad=8, bw=tw+pad*2, bh=18, bx=x-bw/2, by=y-52-bh
+
+  ctx.fillStyle = 'rgba(255,255,255,0.92)'
+  ctx.strokeStyle = '#444466'; ctx.lineWidth = 1.5
+  rr(ctx, bx, by, bw, bh, 5); ctx.fill(); ctx.stroke()
+
+  ctx.fillStyle = 'rgba(255,255,255,0.92)'
+  ctx.beginPath()
+  ctx.moveTo(x-4, by+bh); ctx.lineTo(x+4, by+bh); ctx.lineTo(x, by+bh+7)
+  ctx.closePath(); ctx.fill()
+  ctx.strokeStyle = '#444466'; ctx.lineWidth = 1.5
+  ctx.beginPath()
+  ctx.moveTo(x-4, by+bh); ctx.lineTo(x, by+bh+7); ctx.lineTo(x+4, by+bh)
+  ctx.stroke()
+
+  ctx.fillStyle = '#222233'; ctx.textAlign = 'center'
+  ctx.fillText(text, x, by+12)
+  ctx.restore()
+}
+
+function drawThought(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, alpha: number) {
+  ctx.save(); ctx.globalAlpha = alpha
+  ctx.font = '6px "Press Start 2P", monospace'
+  const tw = ctx.measureText(text).width
+  const pad=8, bw=tw+pad*2, bh=18, bx=x-bw/2, by=y-58-bh
+
+  ctx.fillStyle = 'rgba(220,220,255,0.85)'
+  ctx.strokeStyle = '#666688'; ctx.lineWidth = 1
+  rr(ctx, bx, by, bw, bh, 7); ctx.fill(); ctx.stroke()
+
+  ctx.fillStyle = 'rgba(220,220,255,0.85)'; ctx.strokeStyle = '#666688'; ctx.lineWidth = 1
+  ctx.beginPath(); ctx.arc(x-3, by+bh+5, 3.5, 0, Math.PI*2); ctx.fill(); ctx.stroke()
+  ctx.beginPath(); ctx.arc(x+1, by+bh+12, 2.5, 0, Math.PI*2); ctx.fill(); ctx.stroke()
+  ctx.beginPath(); ctx.arc(x+3, by+bh+17, 1.5, 0, Math.PI*2); ctx.fill(); ctx.stroke()
+
+  ctx.fillStyle = '#444455'; ctx.textAlign = 'center'
+  ctx.fillText(text, x, by+12)
+  ctx.restore()
+}
+
+function drawMTable(ctx: CanvasRenderingContext2D, W: number, H: number) {
+  const cx=meetingTable.x*W, cy=meetingTable.y*H
+  const rw=meetingTable.w*W/2, rh=meetingTable.h*H/2
+  ctx.fillStyle = 'rgba(0,0,0,0.3)'
+  ctx.beginPath(); ctx.ellipse(cx, cy+4, rw+2, rh+2, 0, 0, Math.PI*2); ctx.fill()
+  ctx.fillStyle = '#1f1f42'
+  ctx.beginPath(); ctx.ellipse(cx, cy, rw, rh, 0, 0, Math.PI*2); ctx.fill()
+  ctx.strokeStyle = '#333366'; ctx.lineWidth = 2; ctx.stroke()
+  ctx.fillStyle = 'rgba(100,100,200,0.05)'
+  ctx.beginPath(); ctx.ellipse(cx, cy-3, rw-6, rh-4, 0, 0, Math.PI*2); ctx.fill()
+  ctx.font = '6px "Press Start 2P", monospace'
+  ctx.fillStyle = '#444466'; ctx.textAlign = 'center'
+  ctx.fillText('MEETING TABLE', cx, cy+3)
 }
 
 function drawPlant(ctx: CanvasRenderingContext2D, x: number, y: number, time: number) {
-  const sway = Math.sin(time * 0.002 + x * 10) * 1.5
-  // pot
-  drawPixelRect(ctx, x - 6, y, 12, 10, '#664422')
-  drawPixelRect(ctx, x - 4, y + 2, 8, 6, '#553311')
-  // leaves
+  const sw = Math.sin(time*0.002+x*10)*1.5
+  px(ctx, x-6, y, 12, 10, '#664422'); px(ctx, x-4, y+2, 8, 6, '#553311')
   ctx.fillStyle = '#22aa44'
-  ctx.fillRect(x - 4 + sway, y - 10, 3, 10)
-  ctx.fillRect(x + 1 + sway, y - 12, 3, 12)
-  ctx.fillRect(x - 7 + sway, y - 6, 3, 6)
+  ctx.fillRect(x-4+sw, y-10, 3, 10); ctx.fillRect(x+1+sw, y-12, 3, 12)
+  ctx.fillRect(x-7+sw, y-6, 3, 6)
   ctx.fillStyle = '#33cc55'
-  ctx.fillRect(x - 2 + sway, y - 14, 4, 4)
-  ctx.fillRect(x + 2 + sway, y - 8, 4, 4)
+  ctx.fillRect(x-2+sw, y-14, 4, 4); ctx.fillRect(x+2+sw, y-8, 4, 4)
 }
 
-function drawWatercooler(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  drawPixelRect(ctx, x - 8, y - 30, 16, 30, '#aabbcc')
-  drawPixelRect(ctx, x - 6, y - 28, 12, 12, '#88ccff')
-  drawPixelRect(ctx, x - 10, y - 6, 20, 6, '#8899aa')
+function drawWC(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  px(ctx, x-8, y-30, 16, 30, '#aabbcc')
+  px(ctx, x-6, y-28, 12, 12, '#88ccff')
+  px(ctx, x-10, y-6, 20, 6, '#8899aa')
   ctx.font = '5px "Press Start 2P", monospace'
-  ctx.fillStyle = '#445566'
-  ctx.textAlign = 'center'
-  ctx.fillText('WATER', x, y + 10)
+  ctx.fillStyle = '#445566'; ctx.textAlign = 'center'
+  ctx.fillText('WATER', x, y+10)
 }
 
-function drawServerRack(ctx: CanvasRenderingContext2D, x: number, y: number, time: number) {
-  drawPixelRect(ctx, x - 14, y - 40, 28, 40, '#1a1a2e')
-  drawPixelRect(ctx, x - 12, y - 38, 24, 36, '#0f0f22')
-  // blinking lights
+function drawSR(ctx: CanvasRenderingContext2D, x: number, y: number, time: number) {
+  px(ctx, x-14, y-40, 28, 40, '#1a1a2e')
+  px(ctx, x-12, y-38, 24, 36, '#0f0f22')
   for (let i = 0; i < 5; i++) {
-    const on = Math.sin(time * 0.005 + i * 1.5) > 0
-    ctx.fillStyle = on ? '#00ff88' : '#003322'
-    ctx.fillRect(x - 8, y - 34 + i * 7, 4, 3)
-    ctx.fillStyle = on ? '#ff4444' : '#330011'
-    ctx.fillRect(x + 2, y - 34 + i * 7, 4, 3)
+    const on = Math.sin(time*0.005+i*1.5) > 0
+    ctx.fillStyle = on ? '#00ff88' : '#003322'; ctx.fillRect(x-8, y-34+i*7, 4, 3)
+    ctx.fillStyle = on ? '#ff4444' : '#330011'; ctx.fillRect(x+2, y-34+i*7, 4, 3)
   }
   ctx.font = '5px "Press Start 2P", monospace'
-  ctx.fillStyle = '#334455'
-  ctx.textAlign = 'center'
-  ctx.fillText('SERVERS', x, y + 10)
+  ctx.fillStyle = '#334455'; ctx.textAlign = 'center'
+  ctx.fillText('SERVERS', x, y+10)
 }
 
-function drawCoffeeMachine(ctx: CanvasRenderingContext2D, x: number, y: number, time: number) {
-  drawPixelRect(ctx, x - 10, y - 20, 20, 20, '#2a2a3a')
-  drawPixelRect(ctx, x - 8, y - 16, 16, 10, '#1a1a28')
-  // steam
-  const steam = Math.sin(time * 0.006) * 2
+function drawCM(ctx: CanvasRenderingContext2D, x: number, y: number, time: number) {
+  px(ctx, x-10, y-20, 20, 20, '#2a2a3a')
+  px(ctx, x-8, y-16, 16, 10, '#1a1a28')
+  const st = Math.sin(time*0.006)*2
   ctx.fillStyle = 'rgba(200,200,255,0.15)'
-  ctx.fillRect(x - 2 + steam, y - 26, 3, 6)
-  ctx.fillRect(x + 1 - steam, y - 30, 2, 4)
+  ctx.fillRect(x-2+st, y-26, 3, 6); ctx.fillRect(x+1-st, y-30, 2, 4)
   ctx.font = '5px "Press Start 2P", monospace'
-  ctx.fillStyle = '#445566'
-  ctx.textAlign = 'center'
-  ctx.fillText('COFFEE', x, y + 10)
+  ctx.fillStyle = '#445566'; ctx.textAlign = 'center'
+  ctx.fillText('COFFEE', x, y+10)
 }
 
-function drawAmbientParticles(ctx: CanvasRenderingContext2D, W: number, H: number, time: number, count: number) {
+function drawParticles(ctx: CanvasRenderingContext2D, W: number, H: number, time: number, count: number) {
   for (let i = 0; i < count; i++) {
-    const px = (Math.sin(time * 0.001 + i * 7.3) * 0.5 + 0.5) * W
-    const py = (Math.cos(time * 0.0008 + i * 4.1) * 0.5 + 0.5) * H
-    const alpha = 0.03 + 0.03 * Math.sin(time * 0.003 + i)
-    ctx.fillStyle = `rgba(120, 120, 240, ${alpha})`
-    ctx.fillRect(px, py, 2, 2)
+    const ppx = (Math.sin(time*0.001+i*7.3)*0.5+0.5)*W
+    const ppy = (Math.cos(time*0.0008+i*4.1)*0.5+0.5)*H
+    const a = 0.03+0.03*Math.sin(time*0.003+i)
+    ctx.fillStyle = `rgba(120,120,240,${a})`
+    ctx.fillRect(ppx, ppy, 2, 2)
   }
 }
 
 function drawWalls(ctx: CanvasRenderingContext2D, W: number, H: number) {
-  // top wall
-  const grad = ctx.createLinearGradient(0, 0, 0, 60)
-  grad.addColorStop(0, '#16163a')
-  grad.addColorStop(1, 'transparent')
-  ctx.fillStyle = grad
-  ctx.fillRect(0, 0, W, 60)
-  // left wall
-  const grad2 = ctx.createLinearGradient(0, 0, 40, 0)
-  grad2.addColorStop(0, '#12122a')
-  grad2.addColorStop(1, 'transparent')
-  ctx.fillStyle = grad2
-  ctx.fillRect(0, 0, 40, H)
-  // window on top wall
-  drawPixelRect(ctx, W * 0.3, 4, 80, 36, '#0a0a20')
-  drawPixelRect(ctx, W * 0.3 + 2, 6, 76, 32, '#0e1530')
-  // moonlight from window
+  const g = ctx.createLinearGradient(0,0,0,60)
+  g.addColorStop(0,'#16163a'); g.addColorStop(1,'transparent')
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,60)
+  const g2 = ctx.createLinearGradient(0,0,40,0)
+  g2.addColorStop(0,'#12122a'); g2.addColorStop(1,'transparent')
+  ctx.fillStyle = g2; ctx.fillRect(0,0,40,H)
+  px(ctx, W*0.3, 4, 80, 36, '#0a0a20')
+  px(ctx, W*0.3+2, 6, 76, 32, '#0e1530')
   ctx.fillStyle = 'rgba(100,120,200,0.03)'
   ctx.beginPath()
-  ctx.moveTo(W * 0.3, 40)
-  ctx.lineTo(W * 0.3 + 80, 40)
-  ctx.lineTo(W * 0.3 + 140, H * 0.5)
-  ctx.lineTo(W * 0.3 - 60, H * 0.5)
-  ctx.fill()
-  // second window
-  drawPixelRect(ctx, W * 0.65, 4, 80, 36, '#0a0a20')
-  drawPixelRect(ctx, W * 0.65 + 2, 6, 76, 32, '#0e1530')
-  // OpenClaw logo on wall
+  ctx.moveTo(W*0.3,40); ctx.lineTo(W*0.3+80,40)
+  ctx.lineTo(W*0.3+140,H*0.5); ctx.lineTo(W*0.3-60,H*0.5); ctx.fill()
+  px(ctx, W*0.65, 4, 80, 36, '#0a0a20')
+  px(ctx, W*0.65+2, 6, 76, 32, '#0e1530')
   ctx.font = '10px "Press Start 2P", monospace'
-  ctx.fillStyle = '#222244'
-  ctx.textAlign = 'center'
-  ctx.fillText('⚡ OPENCLAW HQ ⚡', W / 2, 28)
+  ctx.fillStyle = '#222244'; ctx.textAlign = 'center'
+  ctx.fillText('⚡ OPENCLAW HQ ⚡', W/2, 28)
 }
 
-function hexToRgb(hex: string): string {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `${r},${g},${b}`
+// ===== Anim Logic =====
+
+function schedEvt(sc: Sched, ids: string[], pos: Record<string,{x:number;y:number}>, t: number) {
+  const avail = ids.filter(id => sc.states[id]?.state === 'at_desk')
+  if (avail.length < 2) return
+
+  const r = Math.random()
+  if (r < 0.28) {
+    const ch = pick(avail, 2)
+    for (let i = 0; i < ch.length; i++) {
+      const a = sc.states[ch[i]]
+      a.act = 'wc'; a.stayDur = rng(5000,8000); a.partner = ch[1-i]
+      goWalk(a, wcSpots[i].x, wcSpots[i].y, t, false)
+    }
+  } else if (r < 0.48) {
+    const ch = pick(avail, 1)
+    const a = sc.states[ch[0]]
+    a.act = 'coffee'; a.stayDur = rng(4000,6000); a.partner = null
+    goWalk(a, coffeeSpot.x, coffeeSpot.y, t, false)
+  } else if (r < 0.75) {
+    const n = Math.min(avail.length, 2+Math.floor(Math.random()*3))
+    const ch = pick(avail, n)
+    for (let i = 0; i < ch.length; i++) {
+      const a = sc.states[ch[i]]
+      a.act = 'meeting'; a.stayDur = rng(8000,13000); a.partner = ch[(i+1)%ch.length]
+      goWalk(a, mSeats[i%mSeats.length].x, mSeats[i%mSeats.length].y, t, false)
+    }
+  } else {
+    const ch = pick(avail, 2)
+    const hp = pos[ch[1]] || deskPositions[ch[1]]
+    if (!hp) return
+    const vx = hp.x + (hp.x > 0.5 ? -0.06 : 0.06)
+    const a = sc.states[ch[0]]
+    a.act = 'visit'; a.stayDur = rng(4000,7000); a.partner = ch[1]
+    goWalk(a, vx, hp.y+0.02, t, false)
+  }
 }
 
-function shadeColor(color: string, amount: number): string {
-  let r = parseInt(color.slice(1, 3), 16) + amount
-  let g = parseInt(color.slice(3, 5), 16) + amount
-  let b = parseInt(color.slice(5, 7), 16) + amount
-  r = Math.max(0, Math.min(255, r))
-  g = Math.max(0, Math.min(255, g))
-  b = Math.max(0, Math.min(255, b))
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+function updateAnims(sc: Sched, pos: Record<string,{x:number;y:number}>, t: number) {
+  for (const [id, a] of Object.entries(sc.states)) {
+    if (a.state === 'walking') {
+      const el = t - a.walkStart
+      const pr = Math.min(1, el / a.walkDur)
+      const e = ease(pr)
+      a.x = a.fromX + (a.toX - a.fromX)*e
+      a.y = a.fromY + (a.toY - a.fromY)*e
+      if (pr >= 1) {
+        a.x = a.toX; a.y = a.toY
+        if (a.retHome) {
+          const hp = pos[id] || deskPositions[id]
+          a.state = 'at_desk'
+          a.x = hp?.x ?? a.x; a.y = hp?.y ?? a.y
+          a.act = 'none'; a.partner = null
+        } else {
+          a.state = 'at_location'; a.arrTime = t
+        }
+      }
+    } else if (a.state === 'at_location') {
+      if (t - a.arrTime > a.stayDur) {
+        const hp = pos[id] || deskPositions[id]
+        if (hp) goWalk(a, hp.x, hp.y, t, true)
+        else { a.state = 'at_desk'; a.act = 'none' }
+      }
+    }
+  }
 }
+
+function bubbleAlpha(since: number, hash: number, cyc: number): {a:number;i:number}|null {
+  const ph = hash % 2000
+  const ct = (since + ph) % cyc
+  if (ct > cyc*0.6 || since < 600) return null
+  const fi = Math.min(1, ct/300)
+  const pk = cyc*0.5
+  const fo = ct > pk ? Math.max(0, 1-(ct-pk)/400) : 1
+  const a = fi * fo
+  if (a < 0.02) return null
+  return { a, i: Math.floor((since+hash)/cyc) }
+}
+
+function deskBubble(t: number, hash: number): {a:number;i:number}|null {
+  const cyc = 14000
+  const ct = (t + hash*137) % cyc
+  if (ct < 10000 || ct > 13000) return null
+  const lt = ct - 10000
+  const fi = Math.min(1, lt/400)
+  const fo = lt > 2500 ? Math.max(0, 1-(lt-2500)/500) : 1
+  const a = fi*fo
+  if (a < 0.02) return null
+  return { a, i: Math.floor((t+hash)/cyc) }
+}
+
+// ===== Component =====
 
 export default function OfficeView() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -284,8 +526,8 @@ export default function OfficeView() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
 
   const POSITIONS_KEY = 'openpad.office.agentPositions.v1'
+  const schedRef = useRef<Sched | null>(null)
 
-  // Persisted + draggable positions (normalized 0..1)
   const [agentPositions, setAgentPositions] = useState<Record<string, { x: number; y: number }>>(() => {
     try {
       const raw = localStorage.getItem(POSITIONS_KEY)
@@ -309,60 +551,44 @@ export default function OfficeView() {
   })
 
   useEffect(() => {
-    try {
-      localStorage.setItem(POSITIONS_KEY, JSON.stringify(agentPositions))
-    } catch {
-      // ignore
-    }
+    try { localStorage.setItem(POSITIONS_KEY, JSON.stringify(agentPositions)) } catch {}
   }, [agentPositions])
 
-  // Display setting: canvas quality (ambient particle count)
   useEffect(() => {
-    const readQuality = () => {
+    const readQ = () => {
       try {
         const q = localStorage.getItem('openpad:display:canvasQuality')
         if (q === 'low') particleCountRef.current = 10
         else if (q === 'high') particleCountRef.current = 60
         else particleCountRef.current = 30
-      } catch {
-        particleCountRef.current = 30
-      }
+      } catch { particleCountRef.current = 30 }
     }
-
-    readQuality()
-    window.addEventListener('openpad:display-settings', readQuality)
-    return () => window.removeEventListener('openpad:display-settings', readQuality)
+    readQ()
+    window.addEventListener('openpad:display-settings', readQ)
+    return () => window.removeEventListener('openpad:display-settings', readQ)
   }, [])
 
-  // Merge live status into static agents for rendering
   const mergedAgents = agents.map(a => {
     const live = liveAgents.find(la => la.id === a.id)
     return live ? { ...a, status: live.status, currentTask: live.currentTask } : a
   })
 
-  const drawAgentGlow = useCallback((ctx: CanvasRenderingContext2D, cx: number, cy: number, agent: Agent, time: number) => {
+  const drawGlow = useCallback((ctx: CanvasRenderingContext2D, cx: number, cy: number, agent: Agent, time: number) => {
     if (agent.status === 'offline') return
-
-    const rgb = hexToRgb(agent.color)
-    const isActive = agent.status === 'active'
-    const speed = isActive ? 0.008 : 0.0025
-    const pulse = (Math.sin(time * speed + cx * 0.01) + 1) / 2
-
-    const centerY = cy - 30
-    const baseR = isActive ? 42 : 32
-    const r = baseR + pulse * (isActive ? 12 : 6)
-
-    const alphaInner = (isActive ? 0.35 : 0.14) + pulse * (isActive ? 0.15 : 0.06)
-
-    const grad = ctx.createRadialGradient(cx, centerY, 0, cx, centerY, r)
-    grad.addColorStop(0, 'rgba(' + rgb + ', ' + alphaInner + ')')
-    grad.addColorStop(0.55, 'rgba(' + rgb + ', ' + (alphaInner * 0.45) + ')')
-    grad.addColorStop(1, 'rgba(0,0,0,0)')
-
-    ctx.fillStyle = grad
-    ctx.beginPath()
-    ctx.arc(cx, centerY, r, 0, Math.PI * 2)
-    ctx.fill()
+    const rgb = h2r(agent.color)
+    const isA = agent.status === 'active'
+    const spd = isA ? 0.008 : 0.0025
+    const pulse = (Math.sin(time*spd+cx*0.01)+1)/2
+    const cY = cy - 30
+    const baseR = isA ? 42 : 32
+    const r2 = baseR + pulse*(isA ? 12 : 6)
+    const aI = (isA ? 0.35 : 0.14) + pulse*(isA ? 0.15 : 0.06)
+    const gr = ctx.createRadialGradient(cx, cY, 0, cx, cY, r2)
+    gr.addColorStop(0, 'rgba('+rgb+', '+aI+')')
+    gr.addColorStop(0.55, 'rgba('+rgb+', '+(aI*0.45)+')')
+    gr.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = gr
+    ctx.beginPath(); ctx.arc(cx, cY, r2, 0, Math.PI*2); ctx.fill()
   }, [])
 
   const draw = useCallback((time: number) => {
@@ -370,54 +596,116 @@ export default function OfficeView() {
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
+    const W = canvas.width, H = canvas.height
 
-    const W = canvas.width
-    const H = canvas.height
+    // Init scheduler
+    if (!schedRef.current) {
+      const st: Record<string, AnimS> = {}
+      for (const ag of mergedAgents) {
+        const p = agentPositions[ag.id] || deskPositions[ag.id]
+        if (p) st[ag.id] = mkAnim(p.x, p.y)
+      }
+      schedRef.current = { lastEvt: time+3000, nextDel: rng(EVENT_MIN, EVENT_MAX), states: st }
+    }
+    const sc = schedRef.current
 
-    // Clear
+    // Ensure all agents have state
+    for (const ag of mergedAgents) {
+      if (!sc.states[ag.id]) {
+        const p = agentPositions[ag.id] || deskPositions[ag.id]
+        if (p) sc.states[ag.id] = mkAnim(p.x, p.y)
+      }
+    }
+
+    updateAnims(sc, agentPositions, time)
+
+    // Schedule events
+    if (time - sc.lastEvt > sc.nextDel) {
+      schedEvt(sc, mergedAgents.map(a => a.id), agentPositions, time)
+      sc.lastEvt = time
+      sc.nextDel = rng(EVENT_MIN, EVENT_MAX)
+    }
+
     ctx.clearRect(0, 0, W, H)
-
-    // Floor
-    drawCheckerFloor(ctx, W, H)
-
-    // Ambient particles
-    drawAmbientParticles(ctx, W, H, time, 30)
-
-    // Walls
+    drawFloor(ctx, W, H)
+    drawParticles(ctx, W, H, time, 30)
     drawWalls(ctx, W, H)
 
     // Furniture
-    drawMeetingTable(ctx, W, H)
-    plants.forEach((p) => drawPlant(ctx, p.x * W, p.y * H, time))
-    drawWatercooler(ctx, watercooler.x * W, watercooler.y * H)
-    drawServerRack(ctx, serverRack.x * W, serverRack.y * H, time)
-    drawCoffeeMachine(ctx, W * 0.12, H * 0.85, time)
+    drawMTable(ctx, W, H)
+    plants.forEach(p => drawPlant(ctx, p.x*W, p.y*H, time))
+    drawWC(ctx, watercooler.x*W, watercooler.y*H)
+    drawSR(ctx, serverRack.x*W, serverRack.y*H, time)
+    drawCM(ctx, W*0.12, H*0.85, time)
 
-    // Desks and agents
-    mergedAgents.forEach((agent) => {
-      const pos = agentPositions[agent.id] || deskPositions[agent.id]
-      if (!pos) return
-      const dx = pos.x * W, dy = pos.y * H
-      drawDesk(ctx, dx, dy, agent, time)
-      drawAgentGlow(ctx, dx, dy, agent, time)
-      drawAgent(ctx, dx, dy, agent, time)
+    // Desks (always at desk position)
+    mergedAgents.forEach(ag => {
+      const p = agentPositions[ag.id] || deskPositions[ag.id]
+      if (!p) return
+      const anim = sc.states[ag.id]
+      const away = anim ? anim.state !== 'at_desk' : false
+      drawDesk(ctx, p.x*W, p.y*H, ag, time, away)
+    })
+
+    // Agents at desk
+    mergedAgents.forEach(ag => {
+      const p = agentPositions[ag.id] || deskPositions[ag.id]
+      if (!p) return
+      const anim = sc.states[ag.id]
+      if (anim && anim.state !== 'at_desk') return
+
+      const dx = p.x*W, dy = p.y*H
+      drawGlow(ctx, dx, dy, ag, time)
+      drawAgent(ctx, dx, dy, ag, time)
+      drawTyping(ctx, dx, dy, ag, time)
+
+      const h = sHash(ag.id)
+      const tb = deskBubble(time, h)
+      if (tb) {
+        drawThought(ctx, dx, dy-30, tTxt[tb.i % tTxt.length], tb.a)
+      }
+    })
+
+    // Walking / standing agents
+    mergedAgents.forEach(ag => {
+      const anim = sc.states[ag.id]
+      if (!anim || anim.state === 'at_desk') return
+      const ppx = anim.x*W, ppy = anim.y*H
+
+      if (anim.state === 'walking') {
+        drawWalker(ctx, ppx, ppy, ag, time, anim.faceR)
+      } else if (anim.state === 'at_location') {
+        drawStander(ctx, ppx, ppy, ag, time)
+
+        const h = sHash(ag.id)
+        const since = time - anim.arrTime
+
+        if (anim.act === 'coffee') {
+          const b = bubbleAlpha(since, h, 5000)
+          if (b) drawThought(ctx, ppx, ppy-22, tTxt[b.i % tTxt.length], b.a)
+        } else if (anim.act === 'wc' || anim.act === 'visit') {
+          const b = bubbleAlpha(since, h, 3500)
+          if (b) drawSpeech(ctx, ppx, ppy-22, sTxt[b.i % sTxt.length], b.a)
+        } else if (anim.act === 'meeting') {
+          const b = bubbleAlpha(since, h, 4000)
+          if (b) drawSpeech(ctx, ppx, ppy-22, mTxt[b.i % mTxt.length], b.a)
+        }
+      }
     })
 
     // Vignette
-    const vignette = ctx.createRadialGradient(W / 2, H / 2, W * 0.25, W / 2, H / 2, W * 0.7)
-    vignette.addColorStop(0, 'transparent')
-    vignette.addColorStop(1, 'rgba(0,0,0,0.5)')
-    ctx.fillStyle = vignette
+    const vig = ctx.createRadialGradient(W/2, H/2, W*0.25, W/2, H/2, W*0.7)
+    vig.addColorStop(0, 'transparent')
+    vig.addColorStop(1, 'rgba(0,0,0,0.5)')
+    ctx.fillStyle = vig
     ctx.fillRect(0, 0, W, H)
 
     animRef.current = requestAnimationFrame(draw)
-  }, [agentPositions, drawAgentGlow, mergedAgents])
+  }, [agentPositions, drawGlow, mergedAgents])
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-
-    // Prevent touch scrolling while dragging on iPad
     canvas.style.touchAction = 'none'
 
     const resize = () => {
@@ -429,7 +717,6 @@ export default function OfficeView() {
       canvas.style.height = rect.height + 'px'
       const ctx = canvas.getContext('2d')
       if (ctx) ctx.scale(dpr, dpr)
-      // Reset canvas dimensions for drawing (logical)
       canvas.width = rect.width
       canvas.height = rect.height
     }
@@ -438,152 +725,124 @@ export default function OfficeView() {
     window.addEventListener('resize', resize)
     animRef.current = requestAnimationFrame(draw)
 
-    const getCanvasPointFromMouse = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect()
-      return { x: e.clientX - rect.left, y: e.clientY - rect.top, W: rect.width, H: rect.height }
+    const mPos = (e: MouseEvent) => {
+      const r = canvas.getBoundingClientRect()
+      return { x: e.clientX-r.left, y: e.clientY-r.top, W: r.width, H: r.height }
+    }
+    const tPos = (e: TouchEvent) => {
+      const r = canvas.getBoundingClientRect()
+      const t2 = e.touches[0] || e.changedTouches[0]
+      return { x: t2.clientX-r.left, y: t2.clientY-r.top, W: r.width, H: r.height }
     }
 
-    const getCanvasPointFromTouch = (e: TouchEvent) => {
-      const rect = canvas.getBoundingClientRect()
-      const t = e.touches[0] || e.changedTouches[0]
-      return { x: t.clientX - rect.left, y: t.clientY - rect.top, W: rect.width, H: rect.height }
-    }
-
-    const hitTestAgent = (cx: number, cy: number, W: number, H: number): Agent | null => {
-      for (const agent of mergedAgents) {
-        const pos = agentPositions[agent.id] || deskPositions[agent.id]
-        if (!pos) continue
-        const ax = pos.x * W
-        const ay = pos.y * H - 30
-        if (Math.abs(cx - ax) < 40 && Math.abs(cy - ay) < 40) {
-          return agent
+    const hitTest = (cx: number, cy: number, W: number, H: number): Agent | null => {
+      // Check walking/standing agents first
+      if (schedRef.current) {
+        for (const ag of mergedAgents) {
+          const an = schedRef.current.states[ag.id]
+          if (!an || an.state === 'at_desk') continue
+          if (Math.abs(cx - an.x*W) < 30 && Math.abs(cy - an.y*H + 20) < 30) return ag
         }
+      }
+      for (const ag of mergedAgents) {
+        const p = agentPositions[ag.id] || deskPositions[ag.id]
+        if (!p) continue
+        if (Math.abs(cx - p.x*W) < 40 && Math.abs(cy - p.y*H + 30) < 40) return ag
       }
       return null
     }
 
     const clamp01 = (n: number) => Math.max(0, Math.min(1, n))
+    const dragRef: { id: string|null; sx: number; sy: number; sp: {x:number;y:number}|null; moved: boolean } =
+      { id: null, sx: 0, sy: 0, sp: null, moved: false }
+    const DRAG_T = 6
 
-    const dragRef: {
-      draggingId: string | null
-      startX: number
-      startY: number
-      startPos: { x: number; y: number } | null
-      moved: boolean
-    } = { draggingId: null, startX: 0, startY: 0, startPos: null, moved: false }
+    let onMM: ((e: MouseEvent)=>void)|null = null
+    let onMU: ((e: MouseEvent)=>void)|null = null
+    let onTM: ((e: TouchEvent)=>void)|null = null
+    let onTE: ((e: TouchEvent)=>void)|null = null
 
-    const DRAG_THRESHOLD = 6
-
-    let onMouseMove: ((e: MouseEvent) => void) | null = null
-    let onMouseUp: ((e: MouseEvent) => void) | null = null
-    let onTouchMove: ((e: TouchEvent) => void) | null = null
-    let onTouchEnd: ((e: TouchEvent) => void) | null = null
-
-    const beginDrag = (agentId: string, x: number, y: number, W: number, H: number) => {
-      const pos = agentPositions[agentId] || deskPositions[agentId]
+    const beginDrag = (aid: string, x: number, y: number, W: number, H: number) => {
+      const pos = agentPositions[aid] || deskPositions[aid]
       if (!pos) return
-      dragRef.draggingId = agentId
-      dragRef.startX = x
-      dragRef.startY = y
-      dragRef.startPos = { ...pos }
-      dragRef.moved = false
 
-      // If you start dragging something else, hide previous selection until drop/click resolves
+      // Cancel animation if agent is away
+      if (schedRef.current) {
+        const an = schedRef.current.states[aid]
+        if (an && an.state !== 'at_desk') {
+          an.state = 'at_desk'; an.x = pos.x; an.y = pos.y
+          an.act = 'none'; an.partner = null
+        }
+      }
+
+      dragRef.id = aid; dragRef.sx = x; dragRef.sy = y
+      dragRef.sp = { ...pos }; dragRef.moved = false
       setSelectedAgent(null)
 
-      const updateDrag = (nx: number, ny: number) => {
-        if (!dragRef.draggingId || !dragRef.startPos) return
-        const dx = nx - dragRef.startX
-        const dy = ny - dragRef.startY
-        if (!dragRef.moved && Math.hypot(dx, dy) > DRAG_THRESHOLD) dragRef.moved = true
-
-        const nextX = clamp01(dragRef.startPos.x + dx / W)
-        const nextY = clamp01(dragRef.startPos.y + dy / H)
-
-        setAgentPositions(prev => ({ ...prev, [dragRef.draggingId as string]: { x: nextX, y: nextY } }))
+      const upDrag = (nx: number, ny: number) => {
+        if (!dragRef.id || !dragRef.sp) return
+        const ddx = nx-dragRef.sx, ddy = ny-dragRef.sy
+        if (!dragRef.moved && Math.hypot(ddx,ddy) > DRAG_T) dragRef.moved = true
+        const nx2 = clamp01(dragRef.sp.x + ddx/W)
+        const ny2 = clamp01(dragRef.sp.y + ddy/H)
+        setAgentPositions((prev: Record<string, { x: number; y: number }>) => ({ ...prev, [dragRef.id as string]: { x: nx2, y: ny2 } }))
+        if (schedRef.current) {
+          const an = schedRef.current.states[dragRef.id as string]
+          if (an && an.state === 'at_desk') { an.x = nx2; an.y = ny2 }
+        }
       }
 
       const endDrag = () => {
-        const wasMoved = dragRef.moved
-        const releasedId = dragRef.draggingId
-        dragRef.draggingId = null
-        dragRef.startPos = null
-
-        if (!wasMoved && releasedId) {
-          // Treat as click
-          const clicked = mergedAgents.find(a => a.id === releasedId) || null
-          setSelectedAgent(clicked)
+        const wasMoved = dragRef.moved, rid = dragRef.id
+        dragRef.id = null; dragRef.sp = null
+        if (!wasMoved && rid) {
+          setSelectedAgent(mergedAgents.find(a => a.id === rid) || null)
         }
-
-        if (onMouseMove) window.removeEventListener('mousemove', onMouseMove)
-        if (onMouseUp) window.removeEventListener('mouseup', onMouseUp)
-        if (onTouchMove) window.removeEventListener('touchmove', onTouchMove)
-        if (onTouchEnd) window.removeEventListener('touchend', onTouchEnd)
+        if (onMM) window.removeEventListener('mousemove', onMM)
+        if (onMU) window.removeEventListener('mouseup', onMU)
+        if (onTM) window.removeEventListener('touchmove', onTM)
+        if (onTE) window.removeEventListener('touchend', onTE)
       }
 
-      onMouseMove = (e: MouseEvent) => {
-        const p = getCanvasPointFromMouse(e)
-        updateDrag(p.x, p.y)
-      }
+      onMM = (e: MouseEvent) => { const p = mPos(e); upDrag(p.x, p.y) }
+      onMU = () => endDrag()
+      onTM = (e: TouchEvent) => { e.preventDefault(); const p = tPos(e); upDrag(p.x, p.y) }
+      onTE = (e: TouchEvent) => { e.preventDefault(); endDrag() }
 
-      onMouseUp = () => {
-        endDrag()
-      }
-
-      onTouchMove = (e: TouchEvent) => {
-        e.preventDefault()
-        const p = getCanvasPointFromTouch(e)
-        updateDrag(p.x, p.y)
-      }
-
-      onTouchEnd = (e: TouchEvent) => {
-        e.preventDefault()
-        endDrag()
-      }
-
-      window.addEventListener('mousemove', onMouseMove)
-      window.addEventListener('mouseup', onMouseUp)
-      window.addEventListener('touchmove', onTouchMove, { passive: false })
-      window.addEventListener('touchend', onTouchEnd, { passive: false })
+      window.addEventListener('mousemove', onMM)
+      window.addEventListener('mouseup', onMU)
+      window.addEventListener('touchmove', onTM, { passive: false })
+      window.addEventListener('touchend', onTE, { passive: false })
     }
 
-    const handleMouseDown = (e: MouseEvent) => {
-      const p = getCanvasPointFromMouse(e)
-      const found = hitTestAgent(p.x, p.y, p.W, p.H)
-      if (!found) {
-        setSelectedAgent(null)
-        return
-      }
-      beginDrag(found.id, p.x, p.y, p.W, p.H)
+    const onMD = (e: MouseEvent) => {
+      const p = mPos(e); const f = hitTest(p.x, p.y, p.W, p.H)
+      if (!f) { setSelectedAgent(null); return }
+      beginDrag(f.id, p.x, p.y, p.W, p.H)
     }
-
-    const handleTouchStart = (e: TouchEvent) => {
+    const onTS = (e: TouchEvent) => {
       e.preventDefault()
-      const p = getCanvasPointFromTouch(e)
-      const found = hitTestAgent(p.x, p.y, p.W, p.H)
-      if (!found) {
-        setSelectedAgent(null)
-        return
-      }
-      beginDrag(found.id, p.x, p.y, p.W, p.H)
+      const p = tPos(e); const f = hitTest(p.x, p.y, p.W, p.H)
+      if (!f) { setSelectedAgent(null); return }
+      beginDrag(f.id, p.x, p.y, p.W, p.H)
     }
 
-    canvas.addEventListener('mousedown', handleMouseDown)
-    canvas.addEventListener('touchstart', handleTouchStart, { passive: false })
+    canvas.addEventListener('mousedown', onMD)
+    canvas.addEventListener('touchstart', onTS, { passive: false })
 
     return () => {
       window.removeEventListener('resize', resize)
-      canvas.removeEventListener('mousedown', handleMouseDown)
-      canvas.removeEventListener('touchstart', handleTouchStart)
-      if (onMouseMove) window.removeEventListener('mousemove', onMouseMove)
-      if (onMouseUp) window.removeEventListener('mouseup', onMouseUp)
-      if (onTouchMove) window.removeEventListener('touchmove', onTouchMove)
-      if (onTouchEnd) window.removeEventListener('touchend', onTouchEnd)
+      canvas.removeEventListener('mousedown', onMD)
+      canvas.removeEventListener('touchstart', onTS)
+      if (onMM) window.removeEventListener('mousemove', onMM)
+      if (onMU) window.removeEventListener('mouseup', onMU)
+      if (onTM) window.removeEventListener('touchmove', onTM)
+      if (onTE) window.removeEventListener('touchend', onTE)
       cancelAnimationFrame(animRef.current)
     }
   }, [agentPositions, draw, mergedAgents])
 
-  const statusLabel = (s: string) => s === 'active' ? '🟢 Active' : s === 'idle' ? '🟡 Idle' : '🔴 Offline'
+  const sLabel = (s: string) => s === 'active' ? '🟢 Active' : s === 'idle' ? '🟡 Idle' : '🔴 Offline'
 
   return (
     <div className="w-full h-full relative">
@@ -605,7 +864,7 @@ export default function OfficeView() {
                 {selectedAgent.name} — {selectedAgent.role}
               </div>
               <div className="font-pixel text-[8px] text-gray-400 mt-1">
-                {statusLabel(selectedAgent.status)} • {selectedAgent.model}
+                {sLabel(selectedAgent.status)} • {selectedAgent.model}
               </div>
               {selectedAgent.currentTask && (
                 <div className="font-pixel text-[7px] text-gray-500 mt-1">
